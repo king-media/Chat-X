@@ -1,0 +1,8 @@
+{
+  "name": "@whatsapp/backend",
+  "version": "0.0.1",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "NODE_PATH=../ node server.js"
+  }
+}

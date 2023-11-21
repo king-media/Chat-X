@@ -1,0 +1,18 @@
+{
+  "name": "@whatsapp/frontend",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite src",
+    "build": "tsc && vite build src",
+    "preview": "vite preview",
+    "lint": "tsc && eslint ."
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.0.5",
+    "dompurify": "^3.0.6",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0"
+  }
+}
