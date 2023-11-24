@@ -1,18 +1,25 @@
 {
   "name": "@whatsapp/frontend",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
-    "dev": "vite src",
-    "build": "tsc && vite build src",
+    "dev": "vite",
+    "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "tsc && eslint ."
   },
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
     "dompurify": "^3.0.6",
+    "postcss": "^8.4.31",
+    "postcss-nested": "^6.0.1",
     "typescript": "^5.2.2",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "autoprefixer": "^10.4.16",
+    "postcss-plugin": "^1.0.0"
+  },
+  "dependencies": {
+    "@whatsapp/shared": "workspace:*"
   }
 }

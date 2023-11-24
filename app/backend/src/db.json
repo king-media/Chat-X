@@ -1,0 +1,17 @@
+{
+  "chat_table": [
+    {
+      "id": "123",
+      "userName": "King",
+      "chatRoom": null
+    },
+    {
+      "id": "124",
+      "userName": "Miles",
+      "chatRoom": {
+        "id": "1ab6",
+        "lastMessage": "Wassup"
+      }
+    }
+  ]
+}

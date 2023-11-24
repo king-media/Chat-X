@@ -1,9 +1,11 @@
 import DOMPurify from 'dompurify'
 
-type RouteModule = { default: (params?: Record<string, string>) => string }
+type RouteModule = {
+  default: (params?: Record<string, string>) => Promise<string> | string
+}
 type Route = {
   path: string
-  component: (params?: Record<string, string>) => string
+  component: (params?: Record<string, string>) => Promise<string> | string
 }
 
 const ERROR_PAGES: Record<string, RouteModule> = import.meta.glob(
@@ -82,11 +84,11 @@ const router = async () => {
 
   try {
     app.innerHTML =
-      DOMPurify.sanitize(match?.route.component(routeParams)) ||
-      DOMPurify.sanitize(grabErrorRoute()?.component(routeParams))
+      DOMPurify.sanitize(await match?.route.component(routeParams)) ||
+      DOMPurify.sanitize(await grabErrorRoute()?.component(routeParams))
   } catch (e) {
     console.log(e)
-    const errorComponent = grabErrorRoute('_500')?.component(routeParams)
+    const errorComponent = await grabErrorRoute('_500')?.component(routeParams)
 
     app.innerHTML = DOMPurify.sanitize(errorComponent)
   }

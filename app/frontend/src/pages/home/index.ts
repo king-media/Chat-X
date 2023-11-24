@@ -1,6 +1,8 @@
-import ContactList from '../../components/contacts'
+import ChatList from '../../components/chat-list'
 
-const Home = () => {
+import '~/assets/home.css'
+
+const Home = async () => {
   return `
     <header>
       <nav>links here...</nav>
@@ -8,10 +10,12 @@ const Home = () => {
         <h1>ChatX</h1>
         <h3>This is the start of something more than a conversation...</h3>
       </div>
+      <h2> Chats </h2>
     </header>
-    <main>
-      ${ContactList()}
+    <main id="home">
+      ${await ChatList()}
       <div id="chat-container">
+        <div id="chat-room"></div>
         <div id="chat-footer">
           <div id="chat-fields">
             <form action="" method="post">
