@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "sideEffects": false,
   "scripts": {
-    "start": "ts-node src/server.ts",
+    "dev": "ts-node src/server.ts",
     "build": "tsc",
     "serve": "node dist/server.js"
   },

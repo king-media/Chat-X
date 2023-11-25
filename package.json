@@ -12,6 +12,9 @@
     "templates/*",
     "tooling/*"
   ],
+  "scripts": {
+    "dev": "pnpm -r dev"
+  },
   "devDependencies": {
     "@types/node": "^20.9.3",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
