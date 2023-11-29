@@ -15,6 +15,10 @@ app.get('/', async (req: Request, res: Response) => {
   res.send(chatList)
 })
 
+app.post('/auth', async (req: Request, res: Response) => {
+  res.send('authentication code')
+})
+
 const port = process.env.PORT || 3000
 
 app.listen(port, () => {
