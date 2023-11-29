@@ -14,7 +14,8 @@
   ],
   "scripts": {
     "dev": "pnpm -r dev",
-    "serve-backend": "pnpm --filter @whatsapp/backend dev"
+    "serve-backend": "pnpm --filter @whatsapp/backend dev",
+    "deploy-staging": "pnpm i && eb deploy staging"
   },
   "devDependencies": {
     "@types/node": "^20.9.3",
