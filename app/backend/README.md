@@ -19,7 +19,7 @@ This is the server code for my What's App clone app (Chat-X)
 - [Elastic Beanstalk Env](https://aws.amazon.com/elasticbeanstalk/?gclid=CjwKCAiAmZGrBhAnEiwAo9qHicJp1-Vd40eYIgN__v_CSFRZSiPSwYVcx0CdyOqv9ttgTBSZ040TPxoCkxMQAvD_BwE&trk=b1c3dd7d-1b94-4b82-99e3-c1505e3a55fb&sc_channel=ps&ef_id=CjwKCAiAmZGrBhAnEiwAo9qHicJp1-Vd40eYIgN__v_CSFRZSiPSwYVcx0CdyOqv9ttgTBSZ040TPxoCkxMQAvD_BwE:G:s&s_kwcid=AL!4422!3!651737511569!e!!g!!amazon%20beanstalk!19845796021!146736269029):
     An AWS service that allows you to deploy web apps & additional services. Only need to provide the backend code and runtime then deploy the two necessary environments with the right permissions. The default services that are created will be reviewed and adjusted based on the needs for this chat app.
 
-    - **EC2 instance – An Amazon Elastic Compute Cloud (Amazon EC2) virtual machine configured to run Node in my case.**
+    - **EC2 instance – An Amazon Elastic Compute Cloud (Amazon EC2) virtual machine configured to run a [Docker](https://www.docker.com/) container in my case. I chose to run pnpm instead of the regular npm for package management. [PNPM](https://pnpm.io/) is excellent for a mono repo/app.**
 
     > Each platform runs a specific set of software, configuration files, and scripts to support a specific language version, framework, web container, or combination of these. Most platforms use either Apache or NGINX as a reverse proxy that sits in front of your web app, forwards requests to it, serves static assets, and generates access and error logs.
 

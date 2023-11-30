@@ -1,0 +1,32 @@
+# Set Node image as "base" alias Install PNPM and expose the path for the container.
+FROM node:alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+
+FROM base AS build
+COPY ../ /usr/src/app
+WORKDIR /usr/src/app
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run -r build
+RUN pnpm deploy --filter=@whatsapp/backend --prod /prod/backend
+RUN pnpm deploy --filter=@whatsapp/frontend --prod /prod/frontend
+
+# Start from the "base" image and have the resulting image stage alias be "backend". 
+# Set node env (process.env.PORT) copy the build/deploy over and run the serve script.
+FROM base AS backend
+ENV PORT=8000
+COPY --from=build /prod/backend /prod/backend
+WORKDIR /prod/backend
+EXPOSE 8000
+CMD [ "pnpm", "serve" ]
+
+
+# Start from the "base" image and have the resulting image stage alias be "frontend". 
+# Copy the build/deploy over and run the preview script.
+FROM base AS frontend
+COPY --from=build /prod/frontend /prod/frontend
+WORKDIR /prod/frontend
+EXPOSE 8001
+CMD [ "pnpm", "preview" ]

@@ -21,4 +21,10 @@ export default defineConfig({
       },
     ],
   },
+
+  // Define the prot to run the preview in 
+  preview: {
+    host: true,
+    port: 8001
+  }
 })

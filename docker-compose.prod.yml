@@ -1,0 +1,11 @@
+version: '4'
+services:
+  chatx:
+    image: prod:latest
+    build:
+      dockerfile: ./docker/Dockerfile.prod
+    container_name: prod-container
+    ports:
+     - "8000:80"
+    environment:
+      - NODE_ENV=production
