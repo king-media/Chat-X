@@ -1,12 +1,7 @@
-export type ChatRoom = {
-  id: string
-  lastMessage: string
-}
-
 export type Chat = {
   id: string
   userName: string
-  chatRoom: ChatRoom | null
+  chatRooms: string[] | null
   additionalInfo?: unknown
 }
 

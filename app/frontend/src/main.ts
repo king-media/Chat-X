@@ -1,11 +1,11 @@
-import DOMPurify from 'dompurify'
+import { unAuthError } from '@whatsapp/shared'
 
-type RouteModule = {
-  default: (params?: Record<string, string>) => Promise<string> | string
+export type RouteModule = {
+  default: (params?: Record<string, string>) => Promise<Node> | Node
 }
-type Route = {
+export type Route = {
   path: string
-  component: (params?: Record<string, string>) => Promise<string> | string
+  component: (params?: Record<string, string>) => Promise<Node> | Node
 }
 
 const ERROR_PAGES: Record<string, RouteModule> = import.meta.glob(
@@ -31,6 +31,7 @@ const router = async () => {
     const path = route
       .replace('./', '')
       .replace(/routes|index|\.ts$/g, '')
+      .replace(/(?<=\w)\/$/, '')
       .replace(/\[\.{3}.+\]/, '*')
       .replace(/\[(.+)\]/, ':$1')
 
@@ -83,18 +84,25 @@ const router = async () => {
   const app = document.querySelector('#app') as HTMLDivElement
 
   try {
-    app.innerHTML =
-      DOMPurify.sanitize(await match?.route.component(routeParams)) ||
-      DOMPurify.sanitize(await grabErrorRoute()?.component(routeParams))
+    app.replaceChildren(
+      await match?.route.component(routeParams) ||
+      await grabErrorRoute()?.component(routeParams))
   } catch (e) {
-    console.log(e)
+    const error = <Error>e
+    console.log(error)
+
+    if (error.message === unAuthError) {
+      navigateTo('/login')
+      return
+    }
+
     const errorComponent = await grabErrorRoute('_500')?.component(routeParams)
 
-    app.innerHTML = DOMPurify.sanitize(errorComponent)
+    app.replaceChildren(errorComponent)
   }
 }
 
-const navigateTo = (url: string) => {
+export const navigateTo = (url: string) => {
   history.pushState(null, '', url)
   router()
 }

@@ -1,9 +1,13 @@
-import ChatList from '../../components/chat-list'
+import ChatList from '~/pages/chat/components/chat-list'
 
-import '~/assets/home.css'
+import '~/pages/chat/assets/chat.css'
 
-const Home = async () => {
-  return `
+import { type Route } from '~/main'
+
+const Chat: Route['component'] = async () => {
+  const root = document.createElement('div')
+
+  root.innerHTML = `
     <header>
       <nav>links here...</nav>
       <div id="tagline-container">
@@ -13,7 +17,6 @@ const Home = async () => {
       <h2> Chats </h2>
     </header>
     <main id="home">
-      ${await ChatList()}
       <div id="chat-container">
         <div id="chat-room"></div>
         <div id="chat-footer">
@@ -31,6 +34,11 @@ const Home = async () => {
         </div>
       </div>
     </main>`
+
+  const chatList = await ChatList()
+
+  root.querySelector('#home')?.insertAdjacentElement('afterbegin', chatList)
+  return root
 }
 
-export default Home
+export default Chat

@@ -1,0 +1,1 @@
+export const unAuthError = "Unauthorized please sign in"

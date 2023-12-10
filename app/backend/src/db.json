@@ -2,16 +2,19 @@
   "chat_table": [
     {
       "id": "123",
+      "email": "testemail.com",
+      "password": "1234",
+      "creationDate": "12/05/2023",
       "userName": "King",
-      "chatRoom": null
+      "chatRooms": null
     },
     {
       "id": "124",
+      "email": "testemail.com",
+      "password": "1234",
+      "creationDate": "12/05/2023",
       "userName": "Miles",
-      "chatRoom": {
-        "id": "1ab6",
-        "lastMessage": "Wassup"
-      }
+      "chatRooms": ["1ab6"]
     }
   ]
 }

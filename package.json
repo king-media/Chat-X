@@ -14,16 +14,20 @@
   ],
   "scripts": {
     "dev": "pnpm -r dev",
-    "serve-backend": "pnpm --filter @whatsapp/backend dev",
-    "deploy-staging": "pnpm i && eb deploy staging"
+    "build": "pnpm -r build",
+    "preview:frontend": "pnpm --filter @whatsapp/frontend preview",
+    "preview:backend": "pnpm --filter @whatsapp/backend serve",
+    "preview": "pnpm run /^preview:.*/"
+  },
+  "dependencies": {
+    "vite": "^5.0.0",
+    "typescript": "^5.2.2"
   },
   "devDependencies": {
     "@types/node": "^20.9.3",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
-    "eslint": "^8.54.0",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.0"
+    "eslint": "^8.54.0"
   },
   "engines": {
     "node": ">=20.10.0",
