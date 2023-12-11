@@ -1,0 +1,11 @@
+:root {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  --theme-black: #1d2125;
+  --error-red: #ad0404;
+  background-color: var(--theme-black);
+  color: white;
+}
+
+body {
+  margin: 0;
+}

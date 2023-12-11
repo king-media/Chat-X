@@ -1,0 +1,36 @@
+{
+  "name": "whatsapp-clone",
+  "version": "0.0.2",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    ".github/actions/*",
+    "app/*",
+    "packages/*",
+    "templates/*",
+    "tooling/*"
+  ],
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "preview:frontend": "pnpm --filter @chatx/frontend preview",
+    "preview:backend": "pnpm --filter @chatx/backend serve",
+    "preview": "pnpm run /^preview:.*/"
+  },
+  "dependencies": {
+    "vite": "^5.0.0",
+    "typescript": "^5.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.3",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "eslint": "^8.54.0"
+  },
+  "engines": {
+    "node": ">=20.10.0",
+    "npm": ">=10.2.3"
+  }
+}
