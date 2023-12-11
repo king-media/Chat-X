@@ -103,8 +103,8 @@ const Login: Route['component'] = async () => {
         const validation = validateForm(signin ? signInSchema : signUpSchema, body)
 
         if (validation.isValid) {
-            await authenticate(signin, <FormBody>body)
-            navigateTo("/")
+            const authUser = await authenticate(signin, <FormBody>body)
+            if (authUser) navigateTo("/")
             return
         }
 

@@ -1,3 +1,3 @@
-POST http://localhost:3000/auth
+POST http://localhost:3000/api/auth
 
-{ username: K7NG, password: king-dev }
+{ username: user_name, password: Test1234$ }

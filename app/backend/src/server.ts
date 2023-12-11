@@ -1,12 +1,10 @@
-import express, { type Request, type Response } from 'express'
+import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
-import jwt from 'jsonwebtoken'
-import { authenticateRequest } from './middlewares/cookie-auth'
 
-import { type ChatList } from '@whatsapp/shared'
-import * as db from './db.json'
+import authRouter from './router/auth'
+import chatRouter from './router/chats'
 
 import 'dotenv/config'
 // Change productions origin once both staging & prod envs are deployed.
@@ -27,26 +25,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
 
-app.get('/', authenticateRequest, async (req: Request, res: Response) => {
-  // Delete when backend is up
-  const chatList: ChatList = db.chat_table
-
-  res.send(chatList)
-})
-
-app.post('/auth', async (req: Request, res: Response) => {
-  // NOTE: Add logic to find user from DB if ?sigin=true else add user to DB
-  const { username, password } = req.body
-  const token = jwt.sign({ username, password }, <jwt.Secret>process.env.JWT_SECRET, { expiresIn: '1hr' })
-
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production" && true,
-    maxAge: 3600000
-  })
-
-  res.redirect("/")
-})
+app.use('/api/auth', authRouter)
+app.use('/api/chats', chatRouter)
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`)

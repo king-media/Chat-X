@@ -12,7 +12,7 @@ import { type Chat, type ChatList } from '@whatsapp/shared'
 const renderChat = (chat: Chat, chatsContainer: HTMLDivElement) => {
   const listItem = `
   <div class="chat">
-  <span class="chat-name">${chat.userName}</span>
+  <span class="chat-name">${chat.username}</span>
   </div>
   `
   chatsContainer.insertAdjacentHTML('beforeend', listItem)
