@@ -39,7 +39,7 @@ Go ahead and install all the necessary packages.
 
     pnpm install
 
-That's pretty much now to quickly view the app run:
+That's pretty much it now to quickly view the app run:
 
     pnpm dev
 
