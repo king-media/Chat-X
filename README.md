@@ -27,20 +27,19 @@ WILL UPDATE ONCE CI/CD Pipeline is established.
 
 ### Prerequisites
 
-Make sure you have Node v20+ installed. You will also need PNPM(https://pnpm.io/installation) installed globally as well.
+Make sure you have Node v20+ installed. You will also need [PNPM](https://pnpm.io/installation) installed globally as well.
 
 ### Initial Setup
 
 Clone the repo and CD into the project
 
-`git clone https://github.com/king-media/Chat-X.git && cd whatsapp-clone`
+    - `git clone https://github.com/king-media/Chat-X.git && cd whatsapp-clone`
 
 Go ahead and install all the necessary packages.
 
-`pnpm install`
+    - `pnpm install`
 
-That's pretty much now to quickly view the app run:
-`pnpm dev`
+That's pretty much now to quickly view the app run: - `pnpm dev`
 
 Visit the localhost printed out on your terminal by default it should be localhost:5173
 **If for whatever reason you have to run the Vite dev server on a different port you will have to manually pass the PORT as an env variable to the backend service. See the package.json inside of "/app/backend" for scripts.**
