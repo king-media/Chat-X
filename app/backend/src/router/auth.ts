@@ -6,6 +6,7 @@ import * as db from '../db.json'
 
 import { type User } from '@chatx/shared/types'
 import { userNotFound } from '@chatx/shared/constants';
+import { authenticateRequest } from '../middlewares/cookie-auth';
 
 const authRouter = express.Router()
 
@@ -21,6 +22,10 @@ const getUserFromDB = (username: string, password: string): User => {
     throw new Error(userNotFound)
 }
 
+const addUserToDB = (user: User) => {
+    db.users_table.push(user)
+}
+
 authRouter.post('/', async (req, res) => {
     // NOTE: Add logic to find user from DB if ?sigin=true else add user to DB
     let user: User = {
@@ -30,8 +35,10 @@ authRouter.post('/', async (req, res) => {
     }
 
     try {
-        if (req.query.sigin === "true") {
+        if (req.query.signin === "true") {
             user = getUserFromDB(req.body.username, req.body.password)
+        } else {
+            addUserToDB(user)
         }
 
         const token = jwt.sign(user, <jwt.Secret>process.env.JWT_SECRET, { expiresIn: '1hr' })
@@ -47,6 +54,17 @@ authRouter.post('/', async (req, res) => {
         const error = <Error>e
         res.status(404).send(error.message)
     }
+})
+
+authRouter.post('/logout', authenticateRequest, async (req, res) => {
+    //@ts-expect-error Will fix req obj type before v1
+    if (!req.user) {
+        res.status(500).send("Error logging out user.")
+        return
+    }
+
+    res.clearCookie("token")
+    res.status(200).send({ data: "User logged out" })
 })
 
 export default authRouter

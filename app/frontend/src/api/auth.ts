@@ -10,7 +10,7 @@ export const authenticate = async (isSignIn: boolean, body: FormBody) => {
             body: JSON.stringify(body)
         })
 
-        return user
+        localStorage.setItem('currentUser', JSON.stringify(user))
     } catch (e) {
         console.log(e)
         alert('Oops there was an error with attempting to login. Please try again later.')

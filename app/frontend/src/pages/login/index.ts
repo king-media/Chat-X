@@ -1,8 +1,10 @@
-import { type FormSchema, userNameFormat, passwordFormat, validateForm, emailFormat } from '~/utils/forms'
-import { type IFormSubmitEvent } from '~/utils/types'
+import Layout from '~/layout'
 import { navigateTo, type Route } from '~/main'
 import { authenticate } from '~/api/auth'
 import { FormBody } from '~/api/types'
+
+import { type FormSchema, userNameFormat, passwordFormat, validateForm, emailFormat } from '~/utils/forms'
+import { type IFormSubmitEvent } from '~/utils/types'
 
 import '~/pages/login/assets/login.css'
 
@@ -103,8 +105,8 @@ const Login: Route['component'] = async () => {
         const validation = validateForm(signin ? signInSchema : signUpSchema, body)
 
         if (validation.isValid) {
-            const authUser = await authenticate(signin, <FormBody>body)
-            if (authUser) navigateTo("/")
+            await authenticate(signin, <FormBody>body)
+            navigateTo("/")
             return
         }
 
@@ -135,13 +137,6 @@ const Login: Route['component'] = async () => {
 
 
     root.innerHTML = `
-        <header>
-            <nav>links here...</nav>
-            <div id="tagline-container">
-                <h1>ChatX</h1>
-                <h3>This is the start of something more than a conversation...</h3>
-            </div>
-        </header>
         <main id="login">
             ${returnForm()}
         <p>Ready to start chatting <span id="signup-span">signup</span></p>
@@ -153,7 +148,7 @@ const Login: Route['component'] = async () => {
 
     root.querySelector('form')?.addEventListener('submit', (e) => handleSubmit(e, true))
 
-    return root
+    return Layout(root)
 }
 
 export default Login

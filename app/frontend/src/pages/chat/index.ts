@@ -1,3 +1,4 @@
+import Layout from '~/layout'
 import ChatList from '~/pages/chat/components/chat-list'
 
 import '~/pages/chat/assets/chat.css'
@@ -8,14 +9,11 @@ const Chat: Route['component'] = async () => {
   const root = document.createElement('div')
 
   root.innerHTML = `
-    <header>
-      <nav>links here...</nav>
-      <div id="tagline-container">
-        <h1>ChatX</h1>
-        <h3>This is the start of something more than a conversation...</h3>
-      </div>
-      <h2> Chats </h2>
-    </header>
+    <div id="tagline-container">
+      <h1>ChatX</h1>
+      <h3>This is the start of something more than a conversation...</h3>
+    </div>
+    <h2> Chats </h2>
     <main id="home">
       <div id="chat-container">
         <div id="chat-room"></div>
@@ -38,7 +36,8 @@ const Chat: Route['component'] = async () => {
   const chatList = await ChatList()
 
   root.querySelector('#home')?.insertAdjacentElement('afterbegin', chatList)
-  return root
+
+  return Layout(root, true)
 }
 
 export default Chat

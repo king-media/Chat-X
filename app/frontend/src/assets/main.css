@@ -1,5 +1,6 @@
 :root {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  --theme-primary: limegreen;
   --theme-black: #1d2125;
   --error-red: #ad0404;
   background-color: var(--theme-black);
@@ -8,4 +9,12 @@
 
 body {
   margin: 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.primary {
+  color: var(--theme-primary)
 }

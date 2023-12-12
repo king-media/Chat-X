@@ -1,0 +1,76 @@
+#layout-header {
+    display: flex;
+    background-color: black;
+    height: 3.75rem;
+    padding: 0.6rem;
+    margin-bottom: 0.4rem;
+
+    #home-link {
+        color: white;
+        text-decoration: none;
+        transition: all 0.5s ease-in-out;
+        -webkit-transition: all 0.5s ease-in-out;
+        -moz-transition: all 0.5s ease-in-out;
+        -ms-transition: all 0.5s ease-in-out;
+        -o-transition: all 0.5s ease-in-out;
+        &:hover {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            transform: scale(1.10);
+            -webkit-transform: scale(1.10);
+            -moz-transform: scale(1.10);
+            -ms-transform: scale(1.10);
+            -o-transform: scale(1.10);
+        }
+    }
+
+    nav {
+        display: grid;
+        grid-template-columns: minmax(50px, 0.5fr) 3fr 1fr;
+        align-items: center;
+        flex-wrap: wrap;
+        width: 100%;
+
+        a { 
+            justify-self: flex-end;
+            font-size: large;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease-in-out;
+            -webkit-transition: all 0.3s ease-in-out;
+            -moz-transition: all 0.3s ease-in-out;
+            -ms-transition: all 0.3s ease-in-out;
+            -o-transition: all 0.3s ease-in-out;
+
+                      
+            &:hover {
+                transform: scale(1.05);
+                -webkit-transform: scale(1.05);
+                -moz-transform: scale(1.05);
+                -ms-transform: scale(1.05);
+                -o-transform: scale(1.05);
+            }
+        }
+
+        .nav-links {
+            grid-column: 3;
+            padding: 0.4rem 0.8rem;
+            transition: all 0.3s ease-in-out;
+            -webkit-transition: all 0.3s ease-in-out;
+            -moz-transition: all 0.3s ease-in-out;
+            -ms-transition: all 0.3s ease-in-out;
+            -o-transition: all 0.3s ease-in-out;
+
+                      
+            &:hover {
+                border-bottom: 1px solid white;
+                transform: scale(1.05);
+                -webkit-transform: scale(1.05);
+                -moz-transform: scale(1.05);
+                -ms-transform: scale(1.05);
+                -o-transform: scale(1.05);
+            }
+        }
+    }
+}

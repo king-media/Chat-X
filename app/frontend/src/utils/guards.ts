@@ -45,6 +45,30 @@ export const isEmptyCollection = (value: unknown) =>
     Object.keys(value as Array<unknown> | Record<string, unknown>).length === 0;
 
 /**
+ * @remarks {@link isString isString()} checks if the value is a string.
+ *
+ * @param {unknown} value The value to check
+ *
+ * @returns boolean
+ *
+ * @example
+ *
+ * ```ts
+ * isString(''); // true
+ * isString(' '); // true
+ * isString('\t\n\r'); // true
+ * isString('hello'); // true
+ * isString('hello there'); // true
+ * isString(null); // false
+ * isString({ ... }); // false
+ * isString([ ... ]); // false
+ * ```
+ */
+
+export const isString = (value: unknown): value is string =>
+    typeof value === 'string' || value instanceof String
+
+/**
  * @remarks {@link isWhitespaceString isWhitespaceString()} checks if a string is only whitespace
  *
  * @param {unknown} value The value to check

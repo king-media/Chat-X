@@ -1,0 +1,35 @@
+main {
+    height: 90vh;
+}
+
+#settings-container {
+    display: grid;
+    grid-template-columns: 0.5fr 4fr;
+    column-gap: 1.6rem;
+    height: 100%;
+
+    nav {
+        grid-column: 1;
+        border-right: 1px solid gray;
+    }
+
+    .settings-spans {
+        display: block;
+        padding: 0.6rem 1rem;
+        transition: all ease-in-out;
+        -webkit-transition: all ease-in-out;
+        -moz-transition: all ease-in-out;
+        -ms-transition: all ease-in-out;
+        -o-transition: all ease-in-out;
+
+        &:hover {
+            cursor: pointer;
+            border-bottom: 1px solid white;
+            transform: scale(1.05);
+            -webkit-transform: scale(1.05);
+            -moz-transform: scale(1.05);
+            -ms-transform: scale(1.05);
+            -o-transform: scale(1.05);
+        }
+    }
+}
