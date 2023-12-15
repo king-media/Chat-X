@@ -5,11 +5,13 @@ import cookieParser from 'cookie-parser'
 
 import authRouter from './router/auth'
 import chatRouter from './router/chats'
+import usersRouter from './router/users'
 
 import 'dotenv/config'
 // Change productions origin once both staging & prod envs are deployed.
-export const origin = process.env.NODE_ENV === "production" ? "*" : "http://localhost:5173"
-const port = process.env.PORT || 3000
+export const inProduction = process.env.NODE_ENV === "production"
+export const origin = inProduction ? "*" : "http://localhost:5173"
+export const port = process.env.PORT || 3000
 
 const app = express()
 const corsOptions = {
@@ -27,6 +29,7 @@ app.use(bodyParser.json())
 
 app.use('/api/auth', authRouter)
 app.use('/api/chats', chatRouter)
+app.use('/api/users', usersRouter)
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`)

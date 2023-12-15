@@ -3,3 +3,8 @@ export type FormBody = {
     password: string,
     email?: string,
 }
+
+export type ErrorResponse = {
+    data: null;
+    error: string;
+}

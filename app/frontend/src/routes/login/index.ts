@@ -1,3 +1,3 @@
-import Login from '~/pages/login'
+import Login from '~src/pages/login'
 
 export default Login

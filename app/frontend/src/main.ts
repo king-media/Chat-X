@@ -1,12 +1,20 @@
 import { unAuthError } from '@chatx/shared'
+import AppState from '~src/state'
+
+export type RouteProps = {
+  routeParams?: Record<string, string>,
+  appState: AppState
+}
 
 export type RouteModule = {
-  default: (params?: Record<string, string>) => Promise<Node> | Node
+  default: (props: RouteProps) => Promise<Node> | Node
 }
 export type Route = {
   path: string
-  component: (params?: Record<string, string>) => Promise<Node> | Node
+  component: RouteModule['default']
 }
+
+const appState = new AppState()
 
 const ERROR_PAGES: Record<string, RouteModule> = import.meta.glob(
   './routes/(_404|_500).ts',
@@ -28,6 +36,7 @@ const router = async () => {
   const routeParams: Record<string, string> = {}
 
   const routes: Route[] = Object.keys(ROUTES).map((route) => {
+    const component = ROUTES[route]?.default
     const path = route
       .replace('./', '')
       .replace(/routes|index|\.ts$/g, '')
@@ -35,7 +44,7 @@ const router = async () => {
       .replace(/\[\.{3}.+\]/, '*')
       .replace(/\[(.+)\]/, ':$1')
 
-    return { path, component: ROUTES[route]?.default }
+    return { path, component }
   })
 
   const potentialMatches = routes.map((route) => {
@@ -85,8 +94,8 @@ const router = async () => {
 
   try {
     app.replaceChildren(
-      await match?.route.component(routeParams) ||
-      await grabErrorRoute()?.component(routeParams))
+      await match?.route.component({ routeParams, appState }) ||
+      await grabErrorRoute()?.component({ routeParams, appState }))
   } catch (e) {
     const error = <Error>e
     console.log(error)
@@ -96,7 +105,7 @@ const router = async () => {
       return
     }
 
-    const errorComponent = await grabErrorRoute('_500')?.component(routeParams)
+    const errorComponent = await grabErrorRoute('_500')?.component({ routeParams, appState })
 
     app.replaceChildren(errorComponent)
   }
@@ -109,16 +118,14 @@ export const navigateTo = (url: string) => {
 
 window.addEventListener('popstate', router)
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Handle App navigation
-  document.body.addEventListener('click', (e) => {
+// NOTE: Fix rendering error lexical scope issue. Handle App navigation
+document.body.addEventListener('click', (e) => {
+  //@ts-expect-error this is on the object
+  if (e.target?.matches('[data-link]')) {
+    e.preventDefault()
     //@ts-expect-error this is on the object
-    if (e.target?.matches('[data-link]')) {
-      e.preventDefault()
-      //@ts-expect-error this is on the object
-      navigateTo(e.target.href)
-    }
-  })
-
-  router()
+    navigateTo(e.target.href)
+  }
 })
+
+router()

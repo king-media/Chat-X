@@ -1,5 +1,5 @@
-main {
-    height: 90vh;
+main#settings-content {
+    height: 100%;
 }
 
 #settings-container {

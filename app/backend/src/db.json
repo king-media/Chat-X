@@ -1,20 +1,67 @@
 {
   "users_table": [
     {
+      "id": "122",
+      "email": "testemail.com",
+      "password": "Test1234$",
+      "creationDate": "12/05/2023",
+      "username": "no_chat"
+    },
+    {
       "id": "123",
       "email": "testemail.com",
       "password": "Test1234$",
       "creationDate": "12/05/2023",
-      "username": "user_name",
-      "chatRooms": null
+      "username": "user_name"
     },
     {
       "id": "124",
       "email": "testemail.com",
       "password": "Test12345$",
       "creationDate": "12/05/2023",
-      "username": "user.name",
-      "chatRooms": ["1ab6"]
+      "username": "user.name"
+    },
+    {
+      "id": "125",
+      "email": "testemail.com",
+      "password": "Test1234$",
+      "creationDate": "12/05/2023",
+      "username": "k7ng"
+    }
+  ],
+  "chats_table": [
+    {
+      "id": "1ab6",
+      "users": ["124", "125"],
+      "createdAt": "12/06/2023"
+    },
+    {
+      "id": "1ab7",
+      "users": ["124", "125", "123"],
+      "createdAt": "12/07/2023"
+    }
+  ],
+  "messages_table": [
+    {
+      "chatId": "1ab6",
+      "senderId": "125",
+      "text": "Yooo",
+      "createdAt": "12/06/2023",
+      "updatedAt": "12/06/2023"
+    },
+    {
+      "chatId": "1ab6",
+      "senderId": "124",
+      "text": "Ayee what's good",
+      "createdAt": "12/06/2023",
+      "updatedAt": "12/06/2023"
+    },
+    {
+      "chatId": "1ab7",
+      "senderId": "124",
+      "text": "Gang",
+      "createdAt": "12/07/2023",
+      "updatedAt": "12/07/2023"
     }
   ]
 }

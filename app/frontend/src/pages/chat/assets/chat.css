@@ -1,7 +1,12 @@
+div#home-container {
+  height: calc(100% - 16rem);
+}
+
 main#home {
   display: flex;
+  height: 100%;
 
-  #chats-container {
+  #chatlist-container {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -15,6 +20,7 @@ main#home {
     -o-border-radius: 6px;
 
     .chat {
+      display: flex;
       padding: 0.6rem;
       transition: all ease-in-out 3ms;
       -webkit-transition: all ease-in-out 3ms;
@@ -28,8 +34,25 @@ main#home {
         border-bottom: 1px solid black;
       }
 
-      span.chat-name {
-        font-size: large;
+      .user-icon {
+        padding-right: 0.8rem;
+      }
+      
+      h4 {
+        margin: 0
+      }
+
+      .message-metadata {
+        margin-left: auto;
+      }
+
+      .unread {
+        margin-top: 0.6rem;
+        margin-left: 100%;
+      }
+
+      .text-message {
+        margin: 0.6rem 0;
       }
     }
 
@@ -61,12 +84,14 @@ main#home {
   }
 
   #chat-container {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     padding: 0 0.4rem;
-
+    
     #chat-room {
+      height: 100%;
       width: 100%;
-      height: 80vh;
       border: 2px solid black;
       border-radius: 6px;
       -webkit-border-radius: 6px;

@@ -1,3 +1,3 @@
-import Home from '~/pages/chat'
+import Home from '~src/pages/chat'
 
 export default Home

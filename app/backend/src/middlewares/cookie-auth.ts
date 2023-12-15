@@ -13,6 +13,6 @@ export const authenticateRequest = (req: Request, res: Response, next: NextFunct
         next()
     } catch (e) {
         res.clearCookie("token")
-        return res.status(401).send(unAuthError)
+        return res.status(401).send({ data: unAuthError })
     }
 }

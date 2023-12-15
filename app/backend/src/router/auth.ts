@@ -7,6 +7,7 @@ import * as db from '../db.json'
 import { type User } from '@chatx/shared/types'
 import { userNotFound } from '@chatx/shared/constants';
 import { authenticateRequest } from '../middlewares/cookie-auth';
+import { inProduction } from '../server';
 
 const authRouter = express.Router()
 
@@ -27,7 +28,6 @@ const addUserToDB = (user: User) => {
 }
 
 authRouter.post('/', async (req, res) => {
-    // NOTE: Add logic to find user from DB if ?sigin=true else add user to DB
     let user: User = {
         id: uuidv4(),
         ...req.body,
@@ -41,18 +41,18 @@ authRouter.post('/', async (req, res) => {
             addUserToDB(user)
         }
 
-        const token = jwt.sign(user, <jwt.Secret>process.env.JWT_SECRET, { expiresIn: '1hr' })
+        const token = jwt.sign(user, <jwt.Secret>process.env.JWT_SECRET, { expiresIn: '24hr' })
 
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production" && true,
-            maxAge: 3600000
+            secure: inProduction && true,
+            maxAge: 24 * 3600000
         })
 
-        res.send(user)
+        res.send({ data: user })
     } catch (e) {
         const error = <Error>e
-        res.status(404).send(error.message)
+        res.status(404).send({ data: error.message })
     }
 })
 

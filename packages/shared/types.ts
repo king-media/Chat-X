@@ -1,11 +1,13 @@
 export type Chat = {
-  id: string
-  username: string
-  chatRooms: string[] | null
-  additionalInfo?: unknown
+  id: string,
+  users: string[],
+  createdAt: string
 }
 
-export type ChatList = Chat[]
+export type ChatList = {
+  chat: Chat,
+  users: User[]
+}[]
 
 export type User = {
   id: string;
@@ -13,5 +15,4 @@ export type User = {
   password: string;
   creationDate: string;
   username: string;
-  chatRooms: string[] | null
 }

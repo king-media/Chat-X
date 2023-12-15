@@ -1,14 +1,15 @@
-import { Route, navigateTo } from "~/main";
-import Layout from "~/layout";
-import AccountInfo from "~/pages/settings/components/account-info";
-import NotificationSettings from "~/pages/settings/components/notification-settings";
+import { Route, navigateTo } from "~src/main";
+import Layout from "~src/layout";
+import AccountInfo from "~src/pages/settings/components/account-info";
+import NotificationSettings from "~src/pages/settings/components/notification-settings";
 
-import '~/pages/settings/assets/settings.css'
-import { fetchApi } from "~/api/helpers/fetch";
+import '~src/pages/settings/assets/settings.css'
+import { fetchApi } from "~src/api/utilities";
 
 const Settings: Route['component'] = async () => {
     const root = document.createElement('main')
 
+    root.setAttribute('id', 'settings-content')
     root.innerHTML = `
         <h1 class="text-center">ACCOUNT SETTINGS</h1>
         <div id="settings-container">

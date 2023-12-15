@@ -1,12 +1,13 @@
-import Layout from '~/layout'
-import ChatList from '~/pages/chat/components/chat-list'
+import Layout from '~src/layout'
+import ChatList from '~src/pages/chat/components/chat-list'
 
-import '~/pages/chat/assets/chat.css'
+import '~src/pages/chat/assets/chat.css'
 
-import { type Route } from '~/main'
+import { type Route } from '~src/main'
 
-const Chat: Route['component'] = async () => {
+const Chat: Route['component'] = async ({ appState }) => {
   const root = document.createElement('div')
+  root.setAttribute('id', "home-container")
 
   root.innerHTML = `
     <div id="tagline-container">
@@ -33,7 +34,7 @@ const Chat: Route['component'] = async () => {
       </div>
     </main>`
 
-  const chatList = await ChatList()
+  const chatList = await ChatList(appState)
 
   root.querySelector('#home')?.insertAdjacentElement('afterbegin', chatList)
 

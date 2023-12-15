@@ -1,0 +1,55 @@
+.modal {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 50%;
+    height: 30%;
+    padding: 0.6rem;
+    background-color: var(--theme-black);
+    color: whitesmoke;
+    border: 2px solid var(--theme-primary-dark);
+    border-radius: 6px;
+    -webkit-border-radius:6px;
+    -moz-border-radius:6px;
+    -ms-border-radius:6px;
+    -o-border-radius:6px;
+
+    #dialog-title-container {
+        background-color: var(--theme-primary-dark);
+        padding: 0.01rem;
+    }
+
+    #dialog-content {
+        padding: 1rem;
+    }
+    
+    #modal-btn-container {
+        display: flex;
+        column-gap: 1rem;
+        align-self: center;
+    }
+
+    .modal-btn {
+        width: 10rem;
+        padding: 0.2rem;
+        font-size: medium;
+        transition: all 0.3s ease-in-out;
+        -webkit-transition: all 0.3s ease-in-out;
+        -moz-transition: all 0.3s ease-in-out;
+        -ms-transition: all 0.3s ease-in-out;
+        -o-transition: all 0.3s ease-in-out;
+        &:hover {
+            cursor: pointer;
+            transform: scale(1.05);
+            -webkit-transform: scale(1.05);
+            -moz-transform: scale(1.05);
+            -ms-transform: scale(1.05);
+            -o-transform: scale(1.05);
+        }
+    }
+
+    #modal-confirm {
+        background-color: var(--theme-primary);
+        border: 1px solid black;
+    }
+}

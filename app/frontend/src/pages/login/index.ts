@@ -1,16 +1,23 @@
-import Layout from '~/layout'
-import { navigateTo, type Route } from '~/main'
-import { authenticate } from '~/api/auth'
-import { FormBody } from '~/api/types'
+import Layout from '~src/layout'
+import { navigateTo, type Route } from '~src/main'
+import { authenticate } from '~src/api/auth'
+import { FormBody } from '~src/api/types'
 
-import { type FormSchema, userNameFormat, passwordFormat, validateForm, emailFormat } from '~/utils/forms'
-import { type IFormSubmitEvent } from '~/utils/types'
+import { type FormSchema, userNameFormat, passwordFormat, validateForm, emailFormat } from '~src/utils/forms'
+import { type IFormSubmitEvent } from '~src/utils/types'
 
-import '~/pages/login/assets/login.css'
+import '~src/pages/login/assets/login.css'
+import { getCurrentUser } from '~src/utils/state'
+import { isNotBlank } from '@chatx/shared'
 
 type FormType = 'signin' | 'signup'
 
 const Login: Route['component'] = async () => {
+    if (isNotBlank(getCurrentUser())) {
+        // NOTE: Return different HTML that provides an option to logout after explaining that the user is already logged in.
+        navigateTo('/')
+    }
+
     const root = document.createElement('div')
     const signUpSchema: FormSchema = {
         username: {

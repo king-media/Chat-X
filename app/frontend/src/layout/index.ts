@@ -1,8 +1,8 @@
-import { isString } from "~/utils/guards"
-import { getCurrentUser } from "~/utils/state"
+import { isString } from "@chatx/shared"
+import { getCurrentUser } from "~src/utils/state"
 import { unAuthError } from "@chatx/shared"
 
-import '~/layout/assets/layout.css'
+import '~src/layout/assets/layout.css'
 
 const Layout = (children: string | Node, authRequired?: boolean): Node => {
     const root = document.createElement('div')

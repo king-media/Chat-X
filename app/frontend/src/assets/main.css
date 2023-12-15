@@ -1,14 +1,23 @@
 :root {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   --theme-primary: limegreen;
+  --theme-primary-dark: rgb(19, 148, 19);
   --theme-black: #1d2125;
   --error-red: #ad0404;
   background-color: var(--theme-black);
   color: white;
 }
 
-body {
+html, body {
   margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#app, #layout {
+  overflow: auto;
+  height: 100%;
 }
 
 .text-center {

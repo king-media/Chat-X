@@ -1,4 +1,4 @@
-import { getCurrentUser } from "~/utils/state";
+import { getCurrentUser } from "~src/utils/state";
 
 const AccountInfo = (e?: Event, settingsContainer?: HTMLDivElement) => {
     const currentUser = getCurrentUser()

@@ -6,3 +6,7 @@ export const capitalize = (str: string) => {
     const firstLetter = str.charAt(0).toUpperCase()
     return replaceAt(str, firstLetter, 0)
 }
+
+export const firstLetter = (strs: string[]) => strs.map(str => str.charAt(0).toUpperCase()).join()
+
+export const removeCommas = (str: string) => str.replace(/,/g, '')
