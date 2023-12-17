@@ -9,7 +9,7 @@ export type DialogProps = {
     onConfirm?: () => void;
 }
 
-
+// NOTE ERROR_HANDLING: Any errors outside of #app are not caught and break the app.
 const Modal = ({ children, title, ...props }: DialogProps) => {
     const cancelBtnId = "modal-cancel"
     const confirmBtnId = "modal-confirm"

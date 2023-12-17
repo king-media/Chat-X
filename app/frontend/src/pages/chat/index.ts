@@ -2,7 +2,7 @@ import { type ChatList as ChatListType, type User } from '@chatx/shared'
 import Layout from '~src/layout'
 import ChatList from '~src/pages/chat/components/chat-list'
 import { getChats } from '~src/api/chat'
-import { fetchApi, unwrapSettled } from '~src/api/utilities'
+import { fetchApi, handleError, unwrapSettled } from '~src/api/utilities'
 
 
 import '~src/pages/chat/assets/chat.css'
@@ -28,11 +28,16 @@ const Chat: Route['component'] = async ({ appState }) => {
 
   const [chatListResponse, usersResponse] = await Promise.allSettled([getChats(), fetchApi<User[]>('/users')])
 
-  const chatListData = unwrapSettled<ChatListType>(chatListResponse).data
-  const users = unwrapSettled<User[]>(usersResponse).data
-  let pageState = { selectedChat: chatListData?.slice(0)[0] }
+  const chatListData = unwrapSettled<ChatListType>(chatListResponse)
+  const users = unwrapSettled<User[]>(usersResponse)
 
-  appState.setState({ chatList: chatListData, users })
+  if (chatListData.error || users.error) {
+    handleError([chatListData.error, users.error])
+  }
+
+  let pageState = { selectedChat: chatListData.data?.slice(0)[0] }
+
+  appState.setState({ chatList: chatListData.data, users: users.data })
 
 
   const rerender = async () => {

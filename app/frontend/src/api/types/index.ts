@@ -6,12 +6,11 @@ export type FormBody = {
     email?: string,
 }
 
-export type ErrorResponse = {
-    data: null;
-    error: string;
-}
-
 export type CurrentUser = {
     user: User;
     receiveTime: number;
+}
+export interface FetchResponse<T> {
+    data?: T | null;
+    error?: string;
 }
