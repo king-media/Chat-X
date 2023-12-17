@@ -120,14 +120,16 @@ export const navigateTo = (url: string) => {
 
 window.addEventListener('popstate', router)
 
-// NOTE: Fix rendering error lexical scope issue. Handle App navigation
-document.body.addEventListener('click', (e) => {
-  //@ts-expect-error this is on the object
-  if (e.target?.matches('[data-link]')) {
-    e.preventDefault()
+document.addEventListener('DOMContentLoaded', () => {
+  // NOTE: Fix rendering error lexical scope issue. Handle App navigation
+  document.body.addEventListener('click', (e) => {
     //@ts-expect-error this is on the object
-    navigateTo(e.target.href)
-  }
-})
+    if (e.target?.matches('[data-link]')) {
+      e.preventDefault()
+      //@ts-expect-error this is on the object
+      navigateTo(e.target.href)
+    }
+  })
 
-router()
+  router()
+})
