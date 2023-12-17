@@ -5,7 +5,7 @@
 */
 
 
-
+// NOTE: Improve global state to allow reactive programming to updates (may need proxy)
 class AppState {
     // Read-only global state. Have to explicitly call a setter method for state updates.
     private state = {}
@@ -21,7 +21,6 @@ class AppState {
     public setState(updatedState: unknown): void {
         if (typeof updatedState === 'function') {
             this.state = updatedState(this.state)
-            console.log(this.state)
         } else if (typeof updatedState === 'object') {
             this.state = { ...this.state, ...updatedState }
         }

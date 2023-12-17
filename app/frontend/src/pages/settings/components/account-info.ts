@@ -1,4 +1,4 @@
-import { getCurrentUser } from "~src/utils/state";
+import { getCurrentUser } from "~src/api/auth";
 
 const AccountInfo = (e?: Event, settingsContainer?: HTMLDivElement) => {
     const currentUser = getCurrentUser()
@@ -8,9 +8,9 @@ const AccountInfo = (e?: Event, settingsContainer?: HTMLDivElement) => {
     root.setAttribute('id', accountInfoId)
     root.innerHTML = `
         <h1>Account Information</h1>
-        <p>Signed up on ${currentUser?.creationDate}</p>
-        <p>Username: ${currentUser?.username} </p>
-        <p>Email: ${currentUser?.email} </p>
+        <p>Signed up on ${currentUser?.user.creationDate}</p>
+        <p>Username: ${currentUser?.user.username} </p>
+        <p>Email: ${currentUser?.user.email} </p>
     `
 
     if (settingsContainer && !settingsContainer.querySelector(`#${accountInfoId}`)) {

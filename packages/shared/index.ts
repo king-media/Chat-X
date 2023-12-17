@@ -12,4 +12,4 @@ export {
     isWhitespaceString,
     isZeroLengthString
 } from './guards'
-export { type Chat, type ChatList, type User } from './types'
+export type { Chat, ChatList, User, Message } from './types'

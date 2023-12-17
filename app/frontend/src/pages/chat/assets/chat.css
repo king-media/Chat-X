@@ -1,3 +1,8 @@
+@mixin state .chat, .selected {
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
 div#home-container {
   height: calc(100% - 16rem);
 }
@@ -5,6 +10,16 @@ div#home-container {
 main#home {
   display: flex;
   height: 100%;
+    
+  .user-icon {
+    background-color: gray;
+    border-radius: 50%;
+    border: 1px solid black;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+  }
 
   #chatlist-container {
     position: relative;
@@ -22,21 +37,12 @@ main#home {
     .chat {
       display: flex;
       padding: 0.6rem;
+      border-bottom: 1px solid black;
       transition: all ease-in-out 3ms;
       -webkit-transition: all ease-in-out 3ms;
       -moz-transition: all ease-in-out 3ms;
       -ms-transition: all ease-in-out 3ms;
       -o-transition: all ease-in-out 3ms;
-      &:hover {
-        cursor: pointer;
-        background-color: lightgray;
-        border-top: 1px solid black;
-        border-bottom: 1px solid black;
-      }
-
-      .user-icon {
-        padding-right: 0.8rem;
-      }
       
       h4 {
         margin: 0
@@ -90,6 +96,8 @@ main#home {
     padding: 0 0.4rem;
     
     #chat-room {
+      display: flex;
+      flex-direction: column;
       height: 100%;
       width: 100%;
       border: 2px solid black;
@@ -105,4 +113,24 @@ main#home {
       justify-content: flex-end;
     }
   }
+
+  .messages-container {
+    padding: 0.4rem 0.8rem;
+    
+    .user-name {
+      color: gray;
+      margin: 0;
+    }
+
+    .message-container {
+      display: flex;
+      column-gap: 1rem;
+    }
+  }
+
+  #user-messages {
+    align-self: flex-end;
+  }
+
+  
 }

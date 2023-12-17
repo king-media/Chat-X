@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as db from '../db.json'
 
-import { type User } from '@chatx/shared/types'
+import type { User } from '@chatx/shared/types'
 import { userNotFound } from '@chatx/shared/constants';
 import { authenticateRequest } from '../middlewares/cookie-auth';
 import { inProduction } from '../server';

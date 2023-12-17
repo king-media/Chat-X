@@ -6,7 +6,7 @@ export type Chat = {
 
 export type ChatList = {
   chat: Chat,
-  users: User[]
+  recipientUsers: User[]
 }[]
 
 export type User = {
@@ -15,4 +15,12 @@ export type User = {
   password: string;
   creationDate: string;
   username: string;
+}
+
+export type Message = {
+  chatId: string,
+  senderId: string,
+  text: string,
+  createdAt: string,
+  updatedAt: string
 }

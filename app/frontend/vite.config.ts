@@ -4,13 +4,29 @@ import path from 'path'
 
 import { defineConfig } from 'vite'
 
+import postcssMixins from 'postcss-mixins'
 import postcssNested from 'postcss-nested'
 
+const mixins = {
+  state: (mixin, property: string, active: string, color = "lightgray") => ({
+    [property]: {
+      '&:hover': {
+        cursor: 'pointer',
+        backgroundColor: color,
+        '@mixin-content': {}
+      },
+    },
+    [`${property}${active}`]: {
+      backgroundColor: "rgba(0,0,0,0.5)",
+      '@mixin-content': {},
+    }
+  })
+}
 // https://vitejs.dev/config/
 export default defineConfig({
   css: {
     postcss: {
-      plugins: [postcssNested],
+      plugins: [postcssMixins({ mixins }), postcssNested],
     },
   },
   resolve: {

@@ -33,7 +33,7 @@ const Settings: Route['component'] = async () => {
             await fetchApi('/auth/logout', { method: 'POST' })
         } catch (e) {
             const error = <Error>e
-            console.log(error)
+            console.error(error)
         } finally {
             localStorage.removeItem('currentUser')
             navigateTo('/login')

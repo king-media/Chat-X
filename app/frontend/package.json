@@ -1,7 +1,7 @@
 {
   "name": "@chatx/frontend",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,16 +10,17 @@
     "lint": "tsc && eslint ."
   },
   "dependencies": {
-    "vite": "^5.0.0",
+    "@chatx/shared": "workspace:*",
     "typescript": "^5.2.2",
-    "@chatx/shared": "workspace:*"
+    "vite": "^5.0.0"
   },
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
+    "autoprefixer": "^10.4.16",
     "dompurify": "^3.0.6",
     "postcss": "^8.4.31",
+    "postcss-mixins": "^9.0.4",
     "postcss-nested": "^6.0.1",
-    "autoprefixer": "^10.4.16",
     "postcss-plugin": "^1.0.0"
   }
 }

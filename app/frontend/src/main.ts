@@ -1,6 +1,7 @@
 import { unAuthError } from '@chatx/shared'
 import AppState from '~src/state'
 
+
 export type RouteProps = {
   routeParams?: Record<string, string>,
   appState: AppState
@@ -13,6 +14,7 @@ export type Route = {
   path: string
   component: RouteModule['default']
 }
+
 
 const appState = new AppState()
 
@@ -98,7 +100,7 @@ const router = async () => {
       await grabErrorRoute()?.component({ routeParams, appState }))
   } catch (e) {
     const error = <Error>e
-    console.log(error)
+    console.error(error)
 
     if (error.message === unAuthError) {
       navigateTo('/login')

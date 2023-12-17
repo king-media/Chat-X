@@ -4,9 +4,9 @@ import { authenticateRequest } from '../middlewares/cookie-auth';
 import * as db from '../db.json'
 
 import { isBlank } from '@chatx/shared';
-import { type Chat, type ChatList, type User } from '@chatx/shared/types'
+import type { Chat, ChatList, User } from '@chatx/shared/types'
 
-const chatRouter = express.Router()
+const chatsRouter = express.Router()
 
 const getUserChats = (user: User): ChatList => {
     const chats: Chat[] = db.chats_table
@@ -20,20 +20,20 @@ const getUserChats = (user: User): ChatList => {
 
         return {
             chat,
-            users: recipientUsers
+            recipientUsers
         }
     })
 }
 
-chatRouter.use(authenticateRequest)
+chatsRouter.use(authenticateRequest)
 
-chatRouter.get('/', async (req, res) => {
+chatsRouter.get('/', async (req, res) => {
     //@ts-expect-error Will fix req obj type before v1
     const chatList: ChatList = getUserChats(req.user)
     res.send({ data: chatList })
 })
 
-chatRouter.post('/add', async (req, res) => {
+chatsRouter.post('/add', async (req, res) => {
     if (isBlank(req.body)) {
         res.status(400).send({ data: 'Must provide users in order to create chat.' })
         return
@@ -51,4 +51,4 @@ chatRouter.post('/add', async (req, res) => {
     res.send({ data: getUserChats(req.user) })
 })
 
-export default chatRouter
+export default chatsRouter

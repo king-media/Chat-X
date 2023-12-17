@@ -1,5 +1,5 @@
 import { isString } from "@chatx/shared"
-import { getCurrentUser } from "~src/utils/state"
+import { getCurrentUser } from "~src/api/auth"
 import { unAuthError } from "@chatx/shared"
 
 import '~src/layout/assets/layout.css'
@@ -21,7 +21,7 @@ const Layout = (children: string | Node, authRequired?: boolean): Node => {
                     <a id="home-link" href="/" data-link> Chat X</a>
                 </h2>
                 ${currentUser ? (
-            `<h2 class="text-center">Logged in as <span class="primary">${currentUser.username}</span></h2>`
+            `<h2 class="text-center">Logged in as <span class="primary">${currentUser.user.username}</span></h2>`
         ) : ''}
                 <a href="/settings" data-link>
                     <span class="nav-links">settings</span>
