@@ -1,15 +1,29 @@
 import { unAuthError } from '@chatx/shared'
+<<<<<<< Updated upstream
+=======
+import { getCurrentUser } from '~src/api/auth'
+>>>>>>> Stashed changes
 import AppState from '~src/state'
 
 
 export type RouteProps = {
   routeParams?: Record<string, string>,
+<<<<<<< Updated upstream
   appState: AppState
 }
 
 export type RouteModule = {
   default: (props: RouteProps) => Promise<Node> | Node
 }
+=======
+  appState?: AppState
+}
+
+export type RouteModule = {
+  default: (props?: RouteProps) => Promise<Node> | Node
+}
+
+>>>>>>> Stashed changes
 export type Route = {
   path: string
   component: RouteModule['default']
@@ -33,6 +47,9 @@ const errorRoutes: Route[] = Object.keys(ERROR_PAGES).map((route) => {
 
   return { path, component: ERROR_PAGES[route]?.default }
 }, {})
+
+const grabErrorRoute = (errorPage: '_404' | '_500' = '_404') =>
+  errorRoutes.find((route) => route.path === errorPage) as Route
 
 const router = async () => {
   const routeParams: Record<string, string> = {}
@@ -81,9 +98,6 @@ const router = async () => {
 
   let match = potentialMatches.find((potentialMatch) => potentialMatch.isMatch)
 
-  const grabErrorRoute = (errorPage: '_404' | '_500' = '_404') =>
-    errorRoutes.find((route) => route.path === errorPage) as Route
-
   // Return 404 if no match
   if (!match) {
     match = {
@@ -102,7 +116,12 @@ const router = async () => {
     const error = <Error>e
     console.error(error)
 
+<<<<<<< Updated upstream
     if (error.message === unAuthError) {
+=======
+    if (error.message.includes(unAuthError)) {
+      getCurrentUser() && localStorage.removeItem('currentUser')
+>>>>>>> Stashed changes
       navigateTo('/login')
       return
     }
@@ -118,11 +137,23 @@ export const navigateTo = (url: string) => {
   router()
 }
 
+export const navigateToErrorPage = async (errorPage: '_404' | '_500') => {
+  const errorComponent = await grabErrorRoute(errorPage)?.component()
+
+  history.pushState(null, '', `/${errorPage.replace('_', '')}`)
+  document.querySelector('#app')?.replaceChildren(errorComponent)
+}
+
 window.addEventListener('popstate', router)
 
 document.body.addEventListener('click', (e) => {
+<<<<<<< Updated upstream
   //@ts-expect-error this is on the object
   if (e.target?.matches('[data-link]')) {
+=======
+  const target = <HTMLElement>e.target
+  if (target.matches('[data-link]')) {
+>>>>>>> Stashed changes
     e.preventDefault()
     //@ts-expect-error this is on the object
     navigateTo(e.target.href)
