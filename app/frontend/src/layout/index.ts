@@ -32,7 +32,7 @@ const Layout = (children: string | Node, authRequired?: boolean): Node => {
     `
 
     if (!isString(children)) {
-        root.appendChild(children)
+        root.append(children)
     }
 
     return root

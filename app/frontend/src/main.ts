@@ -1,21 +1,10 @@
 import { unAuthError } from '@chatx/shared'
-<<<<<<< Updated upstream
-=======
 import { getCurrentUser } from '~src/api/auth'
->>>>>>> Stashed changes
 import AppState from '~src/state'
 
 
 export type RouteProps = {
   routeParams?: Record<string, string>,
-<<<<<<< Updated upstream
-  appState: AppState
-}
-
-export type RouteModule = {
-  default: (props: RouteProps) => Promise<Node> | Node
-}
-=======
   appState?: AppState
 }
 
@@ -23,7 +12,6 @@ export type RouteModule = {
   default: (props?: RouteProps) => Promise<Node> | Node
 }
 
->>>>>>> Stashed changes
 export type Route = {
   path: string
   component: RouteModule['default']
@@ -116,12 +104,8 @@ const router = async () => {
     const error = <Error>e
     console.error(error)
 
-<<<<<<< Updated upstream
-    if (error.message === unAuthError) {
-=======
     if (error.message.includes(unAuthError)) {
       getCurrentUser() && localStorage.removeItem('currentUser')
->>>>>>> Stashed changes
       navigateTo('/login')
       return
     }
@@ -147,13 +131,8 @@ export const navigateToErrorPage = async (errorPage: '_404' | '_500') => {
 window.addEventListener('popstate', router)
 
 document.body.addEventListener('click', (e) => {
-<<<<<<< Updated upstream
-  //@ts-expect-error this is on the object
-  if (e.target?.matches('[data-link]')) {
-=======
   const target = <HTMLElement>e.target
   if (target.matches('[data-link]')) {
->>>>>>> Stashed changes
     e.preventDefault()
     //@ts-expect-error this is on the object
     navigateTo(e.target.href)

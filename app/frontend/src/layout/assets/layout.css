@@ -74,3 +74,45 @@
         }
     }
 }
+
+#error-layout main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    figcaption {
+        color: gray;
+        a {
+            color: lightgray;
+            text-decoration: none;
+        }
+    }
+
+    img {
+        width: 50rem;
+        height: auto;
+    }
+
+    p {
+        font-size: x-large;
+    }
+
+    .error-home-link {
+        color: var(--theme-primary);
+        transition: all 0.5s ease-in-out;
+        -webkit-transition: all 0.5s ease-in-out;
+        -moz-transition: all 0.5s ease-in-out;
+        -ms-transition: all 0.5s ease-in-out;
+        -o-transition: all 0.5s ease-in-out;
+        &:hover {
+            cursor: pointer;
+            color: var(--theme-primary-dark);
+            transform: scale(1.25);
+            -webkit-transform: scale(1.25);
+            -moz-transform: scale(1.25);
+            -ms-transform: scale(1.25);
+            -o-transform: scale(1.25);
+        }
+    }
+}

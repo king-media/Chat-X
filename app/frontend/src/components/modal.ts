@@ -17,7 +17,7 @@ const Modal = ({ children, title, ...props }: DialogProps) => {
     const dialogElement = document.createElement('dialog')
 
     dialogElement.setAttribute('data-modal', '')
-    dialogElement.setAttribute('class', 'modal')
+    dialogElement.className = 'modal'
     dialogElement.innerHTML =
         `   <div id="dialog-title-container">
                 <h2 class="text-center">${title}</h2>
@@ -35,12 +35,14 @@ const Modal = ({ children, title, ...props }: DialogProps) => {
         `;
 
     const modalHandler = (e: Event) => {
-        if (e.target?.id === cancelBtnId) {
+        const target = <HTMLButtonElement>e.target
+
+        if (target.id === cancelBtnId) {
             app?.removeChild(dialogElement)
             props.onDismiss && props.onDismiss()
         }
 
-        if (e.target?.id === confirmBtnId) {
+        if (target.id === confirmBtnId) {
             app?.removeChild(dialogElement)
             props.onConfirm && props.onConfirm()
         }
@@ -50,11 +52,11 @@ const Modal = ({ children, title, ...props }: DialogProps) => {
     const confirmBtn = dialogElement.querySelector(`#${confirmBtnId}`)
     const dialogContent = dialogElement.querySelector('#dialog-content')
 
-    dialogContent?.appendChild(children)
+    dialogContent?.append(children)
     cancelBtn?.addEventListener('click', modalHandler)
     confirmBtn?.addEventListener('click', modalHandler)
 
-    app?.insertAdjacentElement('afterbegin', dialogElement)
+    app?.prepend(dialogElement)
     dialogElement.showModal()
 }
 

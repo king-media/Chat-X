@@ -8,14 +8,27 @@ const messagesRouter = express.Router()
 
 messagesRouter.use(authenticateRequest)
 
+const invalidChatId = (chatId: string) =>
+    db.chats_table.some(chat => chat.id === chatId)
+
 messagesRouter.get('/:chatId', async (req, res) => {
-    const messages: Message[] = db.messages_table.filter(message => message.chatId === req.params.chatId)
+    const { chatId } = req.params
+
+    if (!invalidChatId(chatId)) {
+        return res.status(400).send({ data: "Invalid chat ID. Chat not found." })
+    }
+
+    const messages: Message[] = db.messages_table.filter(message => message.chatId === chatId)
     res.send({ data: messages })
 })
 
 messagesRouter.post('/:chatId', async (req, res) => {
     const { chatId } = req.params
     const date = new Date().toISOString()
+
+    if (!invalidChatId(chatId)) {
+        return res.status(400).send({ data: "Invalid chat ID. Chat not found." })
+    }
 
     const newMessage = {
         chatId,

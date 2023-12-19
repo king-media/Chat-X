@@ -1,6 +1,6 @@
 import { type User, type Message } from "@chatx/shared";
 import { getCurrentUser } from "~src/api/auth";
-import { fetchApi } from "~src/api/utilities";
+import { fetchApi, handleError } from "~src/api/utilities";
 import type { ChatPageProps } from "~src/pages/chat";
 import { firstLetter } from "~src/utils/strings";
 
@@ -8,14 +8,13 @@ type MessageType = "user" | "recipient";
 
 const ChatRoom = async ({ pageState }: ChatPageProps) => {
     const currentUser = getCurrentUser()
+    const chatId = pageState.selectedChat?.chat.id
 
     const chatRoomContainer = document.createElement('div')
     const userMessagesContainer = document.createElement('div')
     const recipientMessagesContainer = document.createElement('div')
 
-    // NOTE: Fetch messages if there aren't any to display initially.
-
-    const messages = await fetchApi<Message[]>(`/messages/${pageState.selectedChat?.chat.id}`)
+    const messages = await fetchApi<Message[]>(`/messages/${chatId}`)
 
 
     const insertMessage = (type: MessageType, user: User | undefined, message: string) => {
@@ -31,7 +30,7 @@ const ChatRoom = async ({ pageState }: ChatPageProps) => {
             <p class="user-name">${user?.username}</p>
             </div>
             <div class="message-container">
-                <p class="user-icon">${firstLetter([String(user?.username)])}</p>
+                <p class="user-icon">${firstLetter(String(user?.username))}</p>
                 <p class="text-message">${message}</p>
             </div>
         </div>`
@@ -40,7 +39,7 @@ const ChatRoom = async ({ pageState }: ChatPageProps) => {
             userMessagesContainer.insertAdjacentHTML('beforeend', html) :
             recipientMessagesContainer.insertAdjacentHTML('beforeend', html)
     }
-    // NOTE: When DB is active order messages displayed by date + time sent.
+
     const renderMessages = (messages: Message[]) => {
         messages.forEach(message => {
             let user = currentUser?.user
@@ -88,12 +87,17 @@ const ChatRoom = async ({ pageState }: ChatPageProps) => {
             text,
         }
 
-        const newMessage = await fetchApi<Message>(`/messages/${senderId}`, { method: "POST", body: JSON.stringify(message) })
+        try {
+            const newMessage = await fetchApi<Message>(`/messages/${chatId}`, { method: "POST", body: JSON.stringify(message) })
 
-        const messagesHTML = renderMessages([newMessage])
-        const chatRoom = <HTMLDivElement>document.querySelector('#chat-room')
+            const messagesHTML = renderMessages([newMessage])
+            const chatRoom = <HTMLDivElement>document.querySelector('#chat-room')
 
-        chatRoom.innerHTML = messagesHTML
+            chatRoom.innerHTML = messagesHTML
+        } catch (e) {
+            const error = <Error>e
+            handleError(error.message)
+        }
     })
 
     return chatRoomContainer

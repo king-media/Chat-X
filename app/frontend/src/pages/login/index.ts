@@ -13,7 +13,6 @@ type FormType = 'signin' | 'signup'
 
 const Login: Route['component'] = async () => {
     if (isNotBlank(getCurrentUser())) {
-        // NOTE: Return different HTML that provides an option to logout after explaining that the user is already logged in.
         navigateTo('/')
     }
 
@@ -36,6 +35,7 @@ const Login: Route['component'] = async () => {
             format: passwordFormat
         }
     }
+
     const signInSchema: FormSchema = {
         username: {
             required: true,
@@ -94,13 +94,12 @@ const Login: Route['component'] = async () => {
         const event = <IFormSubmitEvent>e
         const elements = Array.from(event?.target?.elements)
         const errorSpans = document.querySelectorAll(`.form-error`)
+
+        event.preventDefault()
         // clear any errors before submitting
         errorSpans.forEach(span => span.innerHTML = "")
 
         const body: Record<string, string> = {}
-
-        event.preventDefault()
-
 
         elements.filter(input => (input as HTMLFormElement).name)
             .forEach(input => {
@@ -117,13 +116,16 @@ const Login: Route['component'] = async () => {
         }
 
         validation.errors?.forEach(error => {
-            const field = <string>Object.keys(error).find(key => elements.some(elem => (elem as HTMLFormElement).name === key))
+            const field = <string>Object.keys(error).find(key => (
+                elements.some(elem => (elem as HTMLFormElement).name === key))
+            )
+
             const fieldErrorElem = <Element>document.querySelector(`#${field}-error`)
 
             fieldErrorElem.innerHTML = ''
 
             error[field].forEach(errorMessage => {
-                fieldErrorElem.setAttribute('class', 'form-error')
+                fieldErrorElem.className = 'form-error'
                 fieldErrorElem.innerHTML = `${fieldErrorElem.innerHTML}<br>${errorMessage}`
             })
         })
@@ -135,7 +137,7 @@ const Login: Route['component'] = async () => {
         const oldForm = root.querySelector('form')
         const isSignIn = type === "signin"
 
-        oldForm?.parentNode?.removeChild(oldForm)
+        oldForm?.remove()
         main?.insertAdjacentHTML('afterbegin', returnForm(type))
         main?.removeChild(main.querySelector('p') as HTMLParagraphElement)
         main?.querySelector('form')?.addEventListener('submit', (e) => handleSubmit(e, isSignIn))

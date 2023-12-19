@@ -1,4 +1,4 @@
-import { isBlank } from "@chatx/shared";
+import { isNotBlank } from "@chatx/shared";
 import { capitalize } from "~src/utils/strings";
 
 export type FormSchema = {
@@ -33,8 +33,7 @@ export const passwordFormat = /^(?=.*[&*+._\-~?$!])(?=.*[A-Z])(?!.*[^a-zA-Z0-9&*
 export const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/g
 
 export const generateFormErrorMessage = (errors: { [key: string]: Record<string, boolean> }, schema: FormSchema) => {
-    // { password: { length: false }}
-    const errorMessages: Record<string, string[]> = {} // { password: ['Bad length', 'Bad format']}
+    const errorMessages: Record<string, string[]> = {}
 
     const field = String(Object.keys(errors).pop())
     const fieldErrors = errors[field]
@@ -115,5 +114,5 @@ const validateLength = (schema: FormSchema, form: Record<string, string>, prop: 
  */
 const validateFormat = (schema: FormSchema, form: Record<string, string>, field: string) => {
     const match = form[field].match(schema[field].format)
-    return !isBlank(match)
+    return isNotBlank(match)
 }

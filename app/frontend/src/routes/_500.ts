@@ -1,19 +1,3 @@
-<<<<<<< Updated upstream
-const Error = () => {
-  const root = document.createElement('main')
-
-  root.innerHTML = `
-    <main>
-      <h1>Sorry something went wrong...</h1>
-    </main>
-  `
-
-  return root
-}
-  
-
-export default Error
-=======
 import ErrorLayout from '~src/layout/error'
 
 import InternalError from '~src/assets/images/500-image.jpg'
@@ -43,4 +27,3 @@ const ServerError = () => {
 }
 
 export default ServerError
->>>>>>> Stashed changes
