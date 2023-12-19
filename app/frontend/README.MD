@@ -1,4 +1,4 @@
-# Chat-X Backend
+# Chat-X Frontend
 
 This is the front end code for my What's App clone app (Chat-X)
 
