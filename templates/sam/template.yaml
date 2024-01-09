@@ -1,0 +1,405 @@
+# This AWS SAM template has been generated from your function's configuration. If
+# your function has one or more triggers, note that the AWS resources associated
+# with these triggers aren't fully specified in this template and include
+# placeholder values. Open this template in AWS Application Composer or your
+# favorite IDE and modify it to specify a serverless application with other AWS
+# resources.
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: An AWS Serverless Application Model template describing your function.
+Resources:
+  ChatxAPI:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      name: "ChatxAPI"
+      Auth:
+        DefaultAuthorizer: JWTAuthorizer
+        Authorizers:
+          JWTAuthorizer:
+            JwtConfiguration:
+              issuer: "var.issuer"
+              audience: "var.audience"
+            IdentitySource: "$request.header.Authorization"
+  ChatxSocketAPI:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: ChatxSocketAPI
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.action"
+
+  SignUpAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist/http/signup.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: signup.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+          JWT_AUDIENCE: var.jwt_audience
+          JWT_CLIENT_ID: var.jwt_client_id
+          JWT_CLIENT_SECRET: var.jwt_secret
+          JWT_TOKEN_URL: var.token_url
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:log-group:/aws/lambda/SignUpAPI:*
+      SnapStart:
+        ApplyOn: None
+      Events:
+        SignUpEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Auth:
+              Authorizer: NONE
+            Path: /signup
+            Method: POST
+        SignInEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Auth:
+              Authorizer: NONE
+            Path: /signin
+            Method: POST
+    Metadata:
+      SkipBuild: True
+
+  RoomsAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist/http/rooms.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: rooms.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:log-group:/aws/lambda/RoomsAPI:*
+      SnapStart:
+        ApplyOn: None
+      Events:
+        GetRoomsEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /rooms/{userId}
+            Method: GET
+        AddRoomEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /rooms/{userId}/add
+            Method: POST
+      RuntimeManagementConfig: {}
+
+  UsersAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist/http/users.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: users.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:log-group:/aws/lambda/UsersAPI:*
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        environment: staging
+        project: chat-x
+      Events:
+        UsersEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /users/{status}
+            Method: GET
+      RuntimeManagementConfig: {}
+
+  MessagesAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist/http/messages.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: messages.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:log-group:/aws/lambda/MessagesAPI:*
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        environment: staging
+        project: chat-x
+      Events:
+        GetMessagesEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /messages/{chatId}
+            Method: GET
+        AddMessagesEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /messages/{chatId}
+            Method: POST
+      RuntimeManagementConfig: {}
+
+  OnConnectAction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist/socket/on-connect.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: on-connect.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:log-group:/aws/lambda/OnConnectAction:*
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        environment: staging
+        project: chat-x
+
+  OnDisconnectAction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist/socket/on-disconnect.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: on-disconnect.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:log-group:/aws/lambda/OnDisconnectAction:*
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        environment: staging
+        project: chat-x
+
+  OnMessageAction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist/socket/on-message.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: on-message.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:log-group:/aws/lambda/OnMessageAction:*
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        environment: staging
+        project: chat-x
+      RuntimeManagementConfig: {}
+
+  # Web Socket routes & integrations
+
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      AuthorizationType: AWS_IAM
+      RouteKey: $connect
+      OperationName: ConnectRoute
+      Target: !Join
+        - "/"
+        - - "integrations"
+          - !Ref ConnectIntegration
+
+  ConnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      Description: Connect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnConnectAction.Arn}/invocations
+
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      RouteKey: $disconnect
+      OperationName: DisconnectRoute
+      Target: !Join
+        - "/"
+        - - "integrations"
+          - !Ref DisconnectIntegration
+
+  DisconnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      Description: Disconnect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnDisconnectAction.Arn}/invocations
+
+  DefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      RouteKey: $default
+
+  OnMessageRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      RouteKey: onMessage
+      OperationName: OnMessageRoute
+      Target: !Join
+        - "/"
+        - - "integrations"
+          - !Ref OnMessageIntegration
+
+  OnMessageIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      Description: Message Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnMessageAction.Arn}/invocations

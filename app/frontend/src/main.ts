@@ -1,24 +1,21 @@
 import { unAuthError } from '@chatx/shared'
 import { getCurrentUser } from '~src/api/auth'
-import AppState from '~src/state'
+import appState from '~src/state'
 
 
 export type RouteProps = {
   routeParams?: Record<string, string>,
-  appState?: AppState
+  appState?: typeof appState
 }
 
 export type RouteModule = {
-  default: (props?: RouteProps) => Promise<Node> | Node
+  default: (props: RouteProps) => Promise<Node> | Node
 }
 
 export type Route = {
   path: string
   component: RouteModule['default']
 }
-
-
-const appState = new AppState()
 
 const ERROR_PAGES: Record<string, RouteModule> = import.meta.glob(
   './routes/(_404|_500).ts',
@@ -122,7 +119,7 @@ export const navigateTo = (url: string) => {
 }
 
 export const navigateToErrorPage = async (errorPage: '_404' | '_500') => {
-  const errorComponent = await grabErrorRoute(errorPage)?.component()
+  const errorComponent = await grabErrorRoute(errorPage)?.component({})
 
   history.pushState(null, '', `/${errorPage.replace('_', '')}`)
   document.querySelector('#app')?.replaceChildren(errorComponent)

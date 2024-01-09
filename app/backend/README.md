@@ -82,6 +82,7 @@ The first version is only an MVP we merely want to allow users to talk to each o
     creationDate: Date!,
     userName: string,
     chatRooms?: string[]
+    status: Enum (online|offline)
   }
   ```
 - Chats: The model for the chat room mentioned above.

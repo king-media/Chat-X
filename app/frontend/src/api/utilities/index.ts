@@ -1,12 +1,15 @@
 import { isString } from "@chatx/shared"
 import type { FetchResponse } from "~src/api/types"
 import { navigateToErrorPage } from "~src/main"
+import { getCurrentUser } from "../auth"
 
 export const fetchApi = async <T>(endpoint?: string, options?: RequestInit): Promise<T> => {
+    const currentUser = getCurrentUser()
     const response = await fetch(`${import.meta.env.VITE_BASE_API}${endpoint || ''}`, {
         ...options,
         headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${currentUser?.access_token}`,
         },
         credentials: "include"
     })

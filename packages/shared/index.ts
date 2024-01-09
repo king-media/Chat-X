@@ -1,4 +1,4 @@
-export { unAuthError } from './constants'
+export { unAuthError, userNotFound, USER_DATA } from './constants'
 export {
     isBlank,
     isEmptyCollection,
@@ -12,4 +12,5 @@ export {
     isWhitespaceString,
     isZeroLengthString
 } from './guards'
-export type { Chat, ChatList, User, Message } from './types'
+export { parseDbUserName } from './user'
+export { type Chat, type ChatList, type User, type Message, type OauthTokenResponse, Status } from './types'

@@ -7,7 +7,7 @@ import '~src/layout/assets/layout.css'
 const Layout = (children: string | Node, authRequired?: boolean): Node => {
     const root = document.createElement('div')
     const currentUser = getCurrentUser()
-
+    // NOTE: Fix this check below its not working properly. Request should not happen if current user isn't found
     if (authRequired && !currentUser) {
         throw new Error(unAuthError)
     }
@@ -21,7 +21,7 @@ const Layout = (children: string | Node, authRequired?: boolean): Node => {
                     <a id="home-link" href="/" data-link> Chat X</a>
                 </h2>
                 ${currentUser ? (
-            `<h2 class="text-center">Logged in as <span class="primary">${currentUser.user.username}</span></h2>`
+            `<h2 class="text-center">Logged in as <span class="primary">${currentUser.user?.username}</span></h2>`
         ) : ''}
                 <a href="/settings" data-link>
                     <span class="nav-links">settings</span>

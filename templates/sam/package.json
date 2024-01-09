@@ -1,0 +1,8 @@
+{
+    "name": "@chatx/sam",
+    "version": "1.0.0",
+    "sideEffects": false,
+    "devDependencies": {
+        "jest": "^29.7.0"
+    }
+}

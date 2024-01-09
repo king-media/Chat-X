@@ -6,12 +6,12 @@
 
 
 // NOTE: Improve global state to allow reactive programming to updates (may need proxy)
-class AppState {
-    // Read-only global state. Have to explicitly call a setter method for state updates.
-    private state = {}
 
-    public getState(field?: string) {
-        return field ? this.state[field] : this.state
+let instance;
+let state = {}
+class AppState {
+    public getState<T>(field?: string): T {
+        return field ? <T>state[field] : <T>state
     }
 
     public setState(updatedState: object): void
@@ -20,11 +20,21 @@ class AppState {
 
     public setState(updatedState: unknown): void {
         if (typeof updatedState === 'function') {
-            this.state = updatedState(this.state)
+            state = updatedState(state)
         } else if (typeof updatedState === 'object') {
-            this.state = { ...this.state, ...updatedState }
+            state = { ...state, ...updatedState }
         }
+    }
+
+    constructor() {
+        if (instance) {
+            throw new Error("New instance cannot be created!!");
+        }
+
+        instance = this
     }
 }
 
-export default AppState
+const appState = Object.freeze(new AppState())
+
+export default appState

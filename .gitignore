@@ -11,7 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
-*.env
+*.env*
 
 # Editor directories and files
 .vscode/*
@@ -24,7 +24,9 @@ dist-ssr
 *.sln
 *.sw?
 
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
+# sam
+.aws-sam
+*.pkg
+samconfig*.*
+template.yml
+sam-templates

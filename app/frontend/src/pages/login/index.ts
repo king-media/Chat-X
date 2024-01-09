@@ -11,7 +11,7 @@ import '~src/pages/login/assets/login.css'
 
 type FormType = 'signin' | 'signup'
 
-const Login: Route['component'] = async () => {
+const Login: Route['component'] = async (props) => {
     if (isNotBlank(getCurrentUser())) {
         navigateTo('/')
     }
@@ -110,9 +110,14 @@ const Login: Route['component'] = async () => {
         const validation = validateForm(signin ? signInSchema : signUpSchema, body)
 
         if (validation.isValid) {
-            await authenticate(signin, <FormBody>body)
-            navigateTo("/")
-            return
+            const authResponse = await authenticate(signin, <FormBody>body)
+
+            if (authResponse?.socketConnection) {
+                props?.appState?.setState({ user: authResponse.user, socketConnection: authResponse.socketConnection })
+                navigateTo("/")
+            } else {
+                throw new Error("connection not established")
+            }
         }
 
         validation.errors?.forEach(error => {

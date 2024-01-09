@@ -7,10 +7,19 @@ export type FormBody = {
 }
 
 export type CurrentUser = {
-    user: User;
+    access_token: string;
+    expires_in: string;
+    user?: User;
     receiveTime: number;
 }
 export interface FetchResponse<T> {
     data?: T | null;
     error?: string;
+}
+
+export interface SocketEvent extends MessageEvent {
+    data: {
+        type: string
+        message: unknown
+    }
 }
