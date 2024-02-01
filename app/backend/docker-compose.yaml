@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+ dynamodb-local:
+   command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data -cors http://localhost:5173,http://localhost:3000"
+   image: "amazon/dynamodb-local:latest"
+   container_name: dynamodb-local
+   ports:
+     - "8000:8000"
+   volumes:
+     - "./docker/dynamodb:/home/dynamodblocal/data"
+   working_dir: /home/dynamodblocal
+ lambda-api:
+  image: default/lambda-api:dev
+  build:
+    context: .
+    dockerfile: Dockerfile-sam
+  command: sam local start-api -v "${PWD}/.aws-sam/build" --host=0.0.0.0 --container-host=host.docker.internal --container-host-interface=127.0.0.1 --debug
+  container_name: lambda-api
+  working_dir: $PWD
+  volumes:
+    - $PWD:$PWD
+    - /var/run/docker.sock:/var/run/docker.sock
+  ports:
+    - "3000:3000"
+  depends_on:
+    - "dynamodb-local"
+  links:
+    - "dynamodb-local"
+  environment:
+    REGION: 'us-east-1'
+    TZ: Etc/GMT
+    SAM_CLI_TELEMETRY: false
+    DOCKER_HOST: unix:///var/run/docker.sock
+    SAM_CLI_CONTAINER_CONNECTION_TIMEOUT: 30
+    sam_local_environment: 'true'

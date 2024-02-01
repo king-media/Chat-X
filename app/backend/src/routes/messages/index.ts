@@ -1,78 +1,11 @@
-import type { APIGatewayProxyEventV2, APIGatewayProxyResult } from 'aws-lambda'
-import {
-    DynamoDBClient,
-    QueryCommand,
-    type QueryCommandInput,
-    PutItemCommand,
-    type PutItemCommandInput
-} from '@aws-sdk/client-dynamodb'
+import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda'
 
 import { isBlank, Message } from '@chatx/shared'
 import { corsHeaders } from '../../api/http/preflight'
+import { handleApiErrors } from '../../utils'
+import { getMessagesByChatId, addMessageToDb } from '../../services/messages'
 
-const client = new DynamoDBClient()
-
-const addMessageToDb = async (message: Message) => {
-    const input: PutItemCommandInput = {
-        Item: {
-            chatId: {
-                S: message.chatId
-            },
-            senderId: {
-                S: message.senderId
-            },
-            connections: {
-                SS: message.connections || [""]
-            },
-            text: {
-                S: message.text
-            },
-            createdAt: {
-                S: new Date().toISOString()
-            },
-            updatedAt: {
-                S: new Date().toISOString()
-            },
-        },
-        TableName: "chatx-messages"
-    }
-
-    const command = new PutItemCommand(input)
-    const messageResponse = await client.send(command)
-
-    return messageResponse
-}
-
-const getMessagesByChatId = async (chatId: string): Promise<Message[] | null> => {
-    const input: QueryCommandInput = {
-        ExpressionAttributeValues: {
-            ":chatId": {
-                S: chatId
-            },
-        },
-        KeyConditionExpression: "chatId = :chatId",
-        TableName: "chatx-messages",
-    }
-
-    const command = new QueryCommand(input)
-    const messagesResponse = await client.send(command)
-
-    if (!messagesResponse.Items) {
-        console.log(`DB Query failed: ${messagesResponse}`)
-        return null
-    }
-
-    return messagesResponse.Items.map(attr => ({
-        chatId,
-        connections: attr.connections.SS,
-        senderId: String(attr.senderId.S),
-        text: String(attr.text.S),
-        createdAt: String(attr.createdAt.S),
-        updatedAt: attr.updatedAt.S
-    }))
-}
-
-export const getChatMessages = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResult> => {
+export const getChatMessages = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     const requestOrigin = String(event.headers.origin)
 
     try {
@@ -104,18 +37,11 @@ export const getChatMessages = async (event: APIGatewayProxyEventV2): Promise<AP
         }
     } catch (e) {
         console.log('Error getting chat messages', e)
-        return {
-            statusCode: 500,
-            headers: {
-                ...corsHeaders,
-                "Access-Control-Allow-Origin": requestOrigin
-            },
-            body: JSON.stringify({ data: String(e) })
-        }
+        return handleApiErrors<APIGatewayProxyResultV2>(e, requestOrigin, "Chat messages")
     }
 }
 
-export const addChatMessage = async (event): Promise<APIGatewayProxyResult> => {
+export const addChatMessage = async (event): Promise<APIGatewayProxyResultV2> => {
     const requestOrigin = String(event.headers.origin)
 
     try {
@@ -148,13 +74,6 @@ export const addChatMessage = async (event): Promise<APIGatewayProxyResult> => {
         }
     } catch (e) {
         console.log('Error adding chat messages', e)
-        return {
-            statusCode: 500,
-            headers: {
-                ...corsHeaders,
-                "Access-Control-Allow-Origin": requestOrigin
-            },
-            body: JSON.stringify({ data: String(e) })
-        }
+        return handleApiErrors<APIGatewayProxyResultV2>(e, requestOrigin)
     }
 }

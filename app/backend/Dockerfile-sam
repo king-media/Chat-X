@@ -1,0 +1,10 @@
+FROM python:alpine
+
+RUN apk update && \
+    apk upgrade && \
+    apk add bash && \
+    apk add --no-cache --virtual build-deps build-base gcc libffi-dev && \
+    pip install aws-sam-cli && \
+    apk del build-deps
+
+ENTRYPOINT [ "" ]

@@ -1,9 +1,10 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda'
 
-
-import { type User, type OauthTokenResponse, isBlank, Status } from '@chatx/shared'
+import { type User, type OauthTokenResponse, isBlank, Status, isNotBlank } from '@chatx/shared'
 import { corsHeaders } from '../../api/http/preflight'
-import { queryUser } from '../../utils'
+import { queryUserByName } from '../../services/users'
+import { testTokenRequest } from '../../utils/test-utils'
+import { handleApiErrors } from '../../utils'
 
 const fetchToken = async () => {
     const tokenUrl = String(process.env.JWT_TOKEN_URL)
@@ -18,6 +19,10 @@ const fetchToken = async () => {
         audience
     }
 
+    if (isNotBlank(process.env.JEST_WORKER_ID)) {
+        return testTokenRequest()
+    }
+
     const signTokenResponse = await fetch(tokenUrl, {
         headers: { 'content-type': 'application/json' },
         method: "POST",
@@ -28,14 +33,15 @@ const fetchToken = async () => {
 }
 
 export const signInLambda = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
-    const requestOrigin = String(event.headers.origin)
+    let requestOrigin
 
     try {
+        requestOrigin = String(event.headers.origin)
         const requestBody = JSON.parse(String(event.body))
 
         console.log('validating user credentials from DB')
 
-        const user = await queryUser(requestBody.username, Status.OFFLINE)
+        const user = await queryUserByName(requestBody.username, Status.OFFLINE)
 
         if (isBlank(user)) {
             console.log("Error: DB couldn't find user")
@@ -52,7 +58,7 @@ export const signInLambda = async (event: APIGatewayProxyEventV2): Promise<APIGa
         if (requestBody.password !== user?.password) {
             console.log("Error: DB password and client password do not match!")
             return {
-                statusCode: 404,
+                statusCode: 401,
                 headers: {
                     ...corsHeaders,
                     "Access-Control-Allow-Origin": requestOrigin
@@ -90,21 +96,15 @@ export const signInLambda = async (event: APIGatewayProxyEventV2): Promise<APIGa
         }
     } catch (e) {
         console.log('Error creating token', e)
-        return {
-            statusCode: 500,
-            headers: {
-                ...corsHeaders,
-                "Access-Control-Allow-Origin": requestOrigin
-            },
-            body: JSON.stringify({ data: String(e) })
-        }
+        return handleApiErrors(e, requestOrigin, "User")
     }
 }
 
 export const signUpLambda = async (event): Promise<APIGatewayProxyResultV2> => {
-    const requestOrigin = String(event.headers.origin)
+    let requestOrigin
 
     try {
+        requestOrigin = String(event.headers.origin)
         const requestBody: User = JSON.parse(String(event.body))
         console.log("fetching token")
         const signTokenResponse = await fetchToken()
@@ -135,13 +135,6 @@ export const signUpLambda = async (event): Promise<APIGatewayProxyResultV2> => {
         }
     } catch (e) {
         console.log('Error creating token', e)
-        return {
-            statusCode: 500,
-            headers: {
-                ...corsHeaders,
-                "Access-Control-Allow-Origin": requestOrigin
-            },
-            body: JSON.stringify({ data: String(e) })
-        }
+        return handleApiErrors(e, requestOrigin, "User")
     }
 }

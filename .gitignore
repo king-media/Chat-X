@@ -28,5 +28,5 @@ dist-ssr
 .aws-sam
 *.pkg
 samconfig*.*
-template.yml
-sam-templates
+template.yaml
+*/backend/sam-templates

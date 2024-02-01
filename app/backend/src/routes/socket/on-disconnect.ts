@@ -1,67 +1,17 @@
 import type { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { DynamoDBClient, QueryCommand, QueryCommandInput, UpdateItemCommand, UpdateItemCommandInput } from '@aws-sdk/client-dynamodb'
 
-import { type User, Status, parseDbUserName, isNotBlank } from '@chatx/shared';
-
-
-const client = new DynamoDBClient()
-
-const getUserFromDb = async (connectionId: string) => {
-    const input: QueryCommandInput = {
-        ExpressionAttributeNames: {
-            "#S": "status"
-        },
-        ExpressionAttributeValues: {
-            ":status": {
-                S: Status.ONLINE
-            },
-            ":connectionId": {
-                S: connectionId
-            },
-        },
-        KeyConditionExpression: "#S = :status",
-        FilterExpression: "connectionId = :connectionId",
-        ProjectionExpression: 'id, username, #S, createdAt, email, connectionId, chatRooms',
-        TableName: 'chatx-users',
-        IndexName: "status-createdAt-index"
-    }
-
-    const command = new QueryCommand(input)
-    const queryUserResponse = await client.send(command)
-
-    return isNotBlank(queryUserResponse.Items) ? queryUserResponse.Items[0] : null
-}
+import { type User, Status, parseDbUserName } from '@chatx/shared';
+import { queryUserByConnection, updateUserConnection } from '../../services/users';
 
 export const disconnectHandler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
     try {
         const connectionId = String(event.requestContext.connectionId)
 
-        const user = await getUserFromDb(connectionId)
-        const input: UpdateItemCommandInput = {
-            ExpressionAttributeNames: {
-                "#S": "status"
-            },
-            ExpressionAttributeValues: {
-                ":status": { S: Status.OFFLINE },
-                ":connectionId": { S: '' }
-            },
-            Key: {
-                id: {
-                    S: String(user?.id.S)
-                },
-                createdAt: {
-                    S: String(user?.createdAt.S)
-                }
-            },
-            UpdateExpression: "SET connectionId = :connectionId, #S = :status",
-            ReturnValues: "ALL_NEW",
-            TableName: 'chatx-users'
-        }
+        const user = await queryUserByConnection(connectionId, Status.ONLINE)
 
         console.log('Sending User put operation on DB')
 
-        const command = new UpdateItemCommand(input)
-        const updateUserResponse = await client.send(command)
+        const updateUserResponse = await updateUserConnection(user?.id, user?.createdAt)
 
         if (updateUserResponse.$metadata.httpStatusCode !== 200 || !updateUserResponse.Attributes) {
             console.log('user not updated', JSON.stringify(updateUserResponse))
@@ -72,12 +22,12 @@ export const disconnectHandler = async (event: APIGatewayEvent): Promise<APIGate
         }
 
         const updatedUser: User = {
-            id: String(updateUserResponse.Attributes.id.S),
-            connectionId: updateUserResponse.Attributes.connectionId.S,
-            username: parseDbUserName(updateUserResponse.Attributes.username.S),
-            email: updateUserResponse.Attributes.email.S,
-            createdAt: String(updateUserResponse.Attributes.createdAt.S),
-            status: <Status>updateUserResponse.Attributes.status.S
+            id: updateUserResponse.Attributes.id,
+            connectionId: updateUserResponse.Attributes.connectionId,
+            username: parseDbUserName(updateUserResponse.Attributes.username),
+            email: updateUserResponse.Attributes.email,
+            createdAt: updateUserResponse.Attributes.createdAt,
+            status: <Status>updateUserResponse.Attributes.status
         }
 
         return {

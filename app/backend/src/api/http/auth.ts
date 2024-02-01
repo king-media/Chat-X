@@ -1,8 +1,8 @@
 import type { APIGatewayProxyHandlerV2 } from 'aws-lambda'
-import { signInLambda, signUpLambda } from '../../routes/signup';
+import { signInLambda, signUpLambda } from '../../routes/auth';
 import { corsHeaders } from './preflight';
 
-enum AuthRouteKeys {
+export enum AuthRoutes {
     SignUpEvent = "POST /signup",
     SignInEvent = "POST /signin"
 }
@@ -15,10 +15,10 @@ export const handler: APIGatewayProxyHandlerV2 = async (event, context) => {
     const { routeKey } = event
 
     switch (routeKey) {
-        case AuthRouteKeys.SignInEvent:
+        case AuthRoutes.SignInEvent:
             return signInLambda(event)
 
-        case AuthRouteKeys.SignUpEvent:
+        case AuthRoutes.SignUpEvent:
             return signUpLambda(event)
 
         default:
@@ -29,7 +29,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event, context) => {
                     ...corsHeaders,
                     "Access-Control-Allow-Origin": requestOrigin
                 },
-                body: JSON.stringify({ data: 'Route undefined! Please request signin or signup' })
+                body: JSON.stringify({ data: 'Route undefined! Please request a signin or signup route.' })
             };
     }
 };

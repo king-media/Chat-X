@@ -1,11 +1,12 @@
 {
   "name": "@chatx/frontend",
   "private": true,
-  "version": "0.4.1",
+  "version": "0.4.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "dev:staging": "vite -m staging",
+    "dev:prod": "vite -m production",
     "build": "tsc && vite build",
     "build:staging": "tsc && vite build -m staging",
     "build:dev": "NODE_ENV=development tsc && vite build -m development",
@@ -28,6 +29,7 @@
     "postcss": "^8.4.31",
     "postcss-mixins": "^9.0.4",
     "postcss-nested": "^6.0.1",
-    "postcss-plugin": "^1.0.0"
+    "postcss-plugin": "^1.0.0",
+    "vitest": "^1.1.3"
   }
 }

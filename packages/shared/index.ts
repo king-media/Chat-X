@@ -12,5 +12,6 @@ export {
     isWhitespaceString,
     isZeroLengthString
 } from './guards'
-export { parseDbUserName } from './user'
-export { type Chat, type ChatList, type User, type Message, type OauthTokenResponse, Status } from './types'
+export { parseDbUserName, stringifyDbUserName } from './user'
+export { camelCase, capitalize, replaceAt } from './string'
+export { type Chat, type ChatList, type User, type Message, type OauthTokenResponse, Status, SocketAction } from './types'

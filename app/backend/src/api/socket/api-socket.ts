@@ -1,9 +1,9 @@
 import type { APIGatewayProxyHandler } from 'aws-lambda'
 import { connectHandler } from '../../routes/socket/on-connect';
 import { disconnectHandler } from '../../routes/socket/on-disconnect';
-import { onMessageHandler } from '../../routes/socket/on-messages';
+import { onMessagesHandler } from '../../routes/socket/on-messages';
 
-enum SocketRouteKeys {
+export enum SocketRouteKeys {
     onConnect = "$connect",
     onDisconnect = "$disconnect",
     onMessage = "onMessage"
@@ -23,12 +23,14 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
             return disconnectHandler(event)
 
         case SocketRouteKeys.onMessage:
-            return onMessageHandler(event)
+            return onMessagesHandler(event)
 
         default:
             return {
                 statusCode: 400,
-                body: `Please provide the correct socket action! Options: ${Object.values(SocketRouteKeys).join(',')}`
+                body: JSON.stringify({
+                    data: `Please provide the correct socket action! Options: ${Object.values(SocketRouteKeys).join(',')}.`
+                })
             }
     }
 };

@@ -1,0 +1,469 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  API-services
+
+  Lambda-services
+
+  Chatx AWS CloudFormation template.
+
+Parameters:
+  Environment:
+    Type: String
+
+Resources:
+  AccessLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join
+        - ""
+        - - "chatx-"
+          - !Ref Environment
+          - "-"
+          - "access"
+
+  ChatxAPI:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Environment
+      Auth:
+        Authorizers:
+          JWTAuthorizer:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              Issuer: "https://issuer-id.us.auth0.com/"
+              Audience:
+                - "https://auth0-audience.com"
+        DefaultAuthorizer: JWTAuthorizer
+      AccessLogSettings:
+        DestinationArn: !GetAtt AccessLogs.Arn
+        Format:
+          "RequestID: $context.requestId | IntegrationError: $context.integrationErrorMessage \
+          Error: $context.error.message | Request Method: $context.httpMethod | [$context.requestTime] | \
+          Request Path: $context.domainName / $context.path | Request Protocol: $context.protocol \
+          Status: $context.status"
+
+  ChatxSocketAPI:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: ChatxSocketAPI
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.action"
+  ChatxStageDeploy:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: !Ref Environment
+      ApiId: !Ref ChatxSocketAPI
+      AutoDeploy: true
+
+  # HttpAPI Definitions (Routes & Integrations):
+  PreFlightAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../dist/http/preflight.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: preflight.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+          ACCESS_ENV: !Ref Environment
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1:account-id:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:account-id:log-group:/aws/lambda/PreFlightAPI:*
+      Events:
+        optionsAPIEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /{proxy+}
+            Method: OPTIONS
+            Auth:
+              Authorizer: NONE
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        environment: !Ref Environment
+        project: chat-x
+
+  AuthAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../dist/http/auth.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: signup.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+          JWT_AUDIENCE: audience
+          JWT_CLIENT_ID: clientId
+          JWT_CLIENT_SECRET: clientSecret
+          JWT_TOKEN_URL: https://id.us.auth0.com/oauth/token
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:*
+              Resource: arn:aws:dynamodb:us-east-1:account-id:table/chatx*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1:account-id:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:account-id:log-group:/aws/lambda/AuthAPI:*
+      Events:
+        AuthAPIEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /signup
+            Method: POST
+            Auth:
+              Authorizer: NONE
+        SignInAPIEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /signin
+            Method: POST
+            Auth:
+              Authorizer: NONE
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        environment: !Ref Environment
+        project: chat-x
+
+  RoomsAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../dist/http/rooms.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: rooms.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:*
+              Resource: arn:aws:dynamodb:us-east-1:account-id:table/chatx*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1:account-id:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:account-id:log-group:/aws/lambda/RoomsAPI:*
+
+      Events:
+        GetRoomsAPIEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /rooms/{userId}
+            Method: GET
+        AddRoomAPIEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /rooms/{userId}
+            Method: POST
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        environment: !Ref Environment
+        project: chat-x
+
+  UsersAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../dist/http/users.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: users.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:*
+              Resource: arn:aws:dynamodb:us-east-1:account-id:table/chatx*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1:account-id:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:account-id:log-group:/aws/lambda/UsersAPI:*
+      Events:
+        UsersByStatusAPIEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /users/{status}
+            Method: GET
+        UserByNameAPIEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /users/get/{username}
+            Method: GET
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        environment: !Ref Environment
+        project: chat-x
+
+  MessagesAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../dist/http/messages.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: messages.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:*
+              Resource: arn:aws:dynamodb:us-east-1:account-id:table/chatx*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1:account-id:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:account-id:log-group:/aws/lambda/MessagesAPI:*
+      Events:
+        GetMessagesAPIEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /messages/{chatId}
+            Method: GET
+        AddMessageAPIEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ChatxAPI
+            Path: /messages/{chatId}
+            Method: POST
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        environment: !Ref Environment
+        project: chat-x
+
+  # Web Socket routes & integrations
+  OnSocketAction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../dist/socket/api-socket.zip
+      Description: ""
+      MemorySize: 128
+      Timeout: 3
+      Handler: api-socket.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+          WSSAPI_ENDPOINT: !Sub
+            - "wss://${ChatxSocketAPI}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+            - Environment: !Ref Environment
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:*
+              Resource: arn:aws:dynamodb:us-east-1:account-id:table/chatx*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1:account-id:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:account-id:log-group:/aws/lambda/OnSocketAction:*
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        environment: !Ref Environment
+        project: chat-x
+  OnSocketPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref OnSocketAction
+      Principal: "apigateway.amazonaws.com"
+
+  WebSocketIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      Description: API Gateway Websocket Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnSocketAction.Arn}/invocations
+
+  # NOTE: Add AuthorizationType when security is figured out
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      AuthorizationType: NONE
+      RouteKey: $connect
+      OperationName: ConnectRoute
+      Target: !Join
+        - "/"
+        - - "integrations"
+          - !Ref WebSocketIntegration
+  ConnectRouteResponse:
+    Type: AWS::ApiGatewayV2::RouteResponse
+    Properties:
+      RouteId: !Ref ConnectRoute
+      ApiId: !Ref ChatxSocketAPI
+      RouteResponseKey: "$default"
+
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      RouteKey: $disconnect
+      OperationName: DisconnectRoute
+      Target: !Join
+        - "/"
+        - - "integrations"
+          - !Ref WebSocketIntegration
+  DisconnectRouteResponse:
+    Type: AWS::ApiGatewayV2::RouteResponse
+    Properties:
+      RouteId: !Ref DisconnectRoute
+      ApiId: !Ref ChatxSocketAPI
+      RouteResponseKey: "$default"
+
+  DefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      RouteKey: $default
+      Target: !Join
+        - "/"
+        - - "integrations"
+          - !Ref WebSocketIntegration
+  DefaultRouteResponse:
+    Type: AWS::ApiGatewayV2::RouteResponse
+    Properties:
+      RouteId: !Ref DefaultRoute
+      ApiId: !Ref ChatxSocketAPI
+      RouteResponseKey: "$default"
+
+  OnMessageRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ChatxSocketAPI
+      RouteKey: onMessage
+      OperationName: OnMessageRoute
+      Target: !Join
+        - "/"
+        - - "integrations"
+          - !Ref WebSocketIntegration
+  OnMessageRouteResponse:
+    Type: AWS::ApiGatewayV2::RouteResponse
+    Properties:
+      RouteId: !Ref OnMessageRoute
+      ApiId: !Ref ChatxSocketAPI
+      RouteResponseKey: "$default"

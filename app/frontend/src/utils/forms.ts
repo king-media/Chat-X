@@ -1,5 +1,4 @@
-import { isNotBlank } from "@chatx/shared";
-import { capitalize } from "~src/utils/strings";
+import { isNotBlank, capitalize } from "@chatx/shared";
 
 export type FormSchema = {
     [key: string]: {

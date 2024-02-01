@@ -12,7 +12,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event, context) => {
     console.log(`Context: ${JSON.stringify(context, null, 2)}`);
 
     const requestOrigin = String(event.headers.origin)
-    const { routeKey } = event.requestContext
+    const { routeKey } = event
 
     switch (routeKey) {
         case MessagesRouteKeys.GetMessagesEvent:
@@ -26,7 +26,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event, context) => {
             return {
                 statusCode: 404,
                 headers: { ...corsHeaders, "Access-Control-Allow-Origin": requestOrigin },
-                body: JSON.stringify({ data: 'Route undefined! Please request a message route' }),
+                body: JSON.stringify({ data: 'Route undefined! Please request a message route.' }),
             };
     }
 };

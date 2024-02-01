@@ -2,7 +2,7 @@ import type { APIGatewayProxyHandlerV2 } from 'aws-lambda'
 import { getUserRooms, addUserRoom } from '../../routes/rooms';
 import { corsHeaders } from './preflight';
 
-enum RoomsRouteKeys {
+export enum RoomsRouteKeys {
     GetRoomsEvent = "GET /rooms/{userId}",
     AddRoomEvent = "POST /rooms/{userId}"
 }

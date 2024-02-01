@@ -1,3 +1,12 @@
+export enum SocketAction {
+  NEW_MESSAGE = 'NEW_MESSAGE'
+}
+
+export enum Status {
+  OFFLINE = "OFFLINE",
+  ONLINE = "ONLINE"
+}
+
 export type Chat = {
   id: string,
   users: {
@@ -12,17 +21,12 @@ export type ChatList = {
   recipientUsers: User[]
 }[]
 
-export enum Status {
-  OFFLINE = "OFFLINE",
-  ONLINE = "ONLINE"
-}
-
 export type User = {
   id?: string;
   email?: string;
   username?: string;
   password?: string;
-  createdAt: string;
+  createdAt?: string;
   status?: Status;
   connectionId?: string;
   chatRooms?: {
