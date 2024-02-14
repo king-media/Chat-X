@@ -111,6 +111,7 @@ main#home {
     #chat-footer {
       display: flex;
       justify-content: flex-end;
+      margin-top: auto;
     }
   }
 
@@ -131,6 +132,4 @@ main#home {
   #user-messages {
     align-self: flex-end;
   }
-
-  
 }

@@ -1,6 +1,6 @@
 import { createResponse, mockLambdaProxyArgs } from "../../../utils/test-utils";
 import { UsersRouteKeys, handler } from "../../http/users";
-import { getUserByUsername, getUsersByStatus } from "../../../routes/users";
+import { getUserByUsername, getUsersByStatus, getUsersByPrimaryKey } from "../../../routes/users";
 
 import { mockUserPrimaries } from "../mocks";
 import type { APIGatewayProxyResultV2 } from "aws-lambda";
@@ -9,11 +9,13 @@ import type { APIGatewayProxyResultV2 } from "aws-lambda";
 jest.mock("../../../routes/users", () => ({
     __esModule: true,
     getUsersByStatus: jest.fn(),
-    getUserByUsername: jest.fn()
+    getUserByUsername: jest.fn(),
+    getUsersByPrimaryKey: jest.fn()
 }))
 
 const mockGetUsersByStatus = getUsersByStatus as jest.Mock<Promise<APIGatewayProxyResultV2>>
 const mockGetUserByUsername = getUserByUsername as jest.Mock<Promise<APIGatewayProxyResultV2>>
+const mockGetUsersByPrimaryKey = getUsersByPrimaryKey as jest.Mock<Promise<APIGatewayProxyResultV2>>
 
 describe('Users Route Handler', () => {
     let expectedUsers, expectedUser
@@ -22,6 +24,7 @@ describe('Users Route Handler', () => {
         expectedUser = createResponse(200, mockUserPrimaries[0])
 
         mockGetUsersByStatus.mockResolvedValue(expectedUsers)
+        mockGetUsersByPrimaryKey.mockResolvedValue(expectedUsers)
         mockGetUserByUsername.mockResolvedValue(expectedUser)
     })
 
@@ -42,6 +45,16 @@ describe('Users Route Handler', () => {
 
             expect(mockGetUserByUsername).toHaveBeenCalledWith(event)
             expect(response).toEqual(expectedUser)
+        })
+    })
+
+    describe(`When ${UsersRouteKeys.UsersByPrimaryKey} is called`, () => {
+        it('should return users.', async () => {
+            const { event, context } = mockLambdaProxyArgs({ routeKey: UsersRouteKeys.UsersByPrimaryKey })
+            const response = await handler(event, context, () => { })
+
+            expect(mockGetUsersByPrimaryKey).toHaveBeenCalledWith(event)
+            expect(response).toEqual(expectedUsers)
         })
     })
 

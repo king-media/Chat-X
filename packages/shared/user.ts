@@ -7,7 +7,7 @@ export const parseDbUserName = (dbUserName?: string) => {
         const match = dbUserName.match(dbUserNameRegex)
 
         if (!match || !match.groups) {
-            return ''
+            return dbUserName
         }
 
         return match.groups?.username

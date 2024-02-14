@@ -17,9 +17,7 @@ export const fetchApi = async <T>(endpoint?: string, options?: RequestInit): Pro
     // Handle all error reasons based on status & or message
     if (response.status !== 200) {
         const { data: errorMessage } = await response.json()
-        const error = new Error(errorMessage)
-
-        throw error
+        return Promise.reject({ status: response.status, errorMessage })
     }
 
     const { data } = await response.json()
@@ -29,8 +27,9 @@ export const fetchApi = async <T>(endpoint?: string, options?: RequestInit): Pro
 export const unwrapSettled = <T>(result: PromiseSettledResult<T>): FetchResponse<T> =>
     result.status === 'rejected' ? ({
         data: null,
-        error: result.reason
-    }) : { data: result.value };
+        status: result.reason?.status || 500,
+        error: result.reason?.errorMessage || result.reason
+    }) : { data: result.value, status: 200 };
 
 export function handleError(error: FetchResponse<unknown>['error']): void
 export function handleError(errors: FetchResponse<unknown>['error'][]): void

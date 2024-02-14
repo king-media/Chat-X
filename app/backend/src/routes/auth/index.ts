@@ -1,11 +1,14 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda'
 
-import { type User, type OauthTokenResponse, isBlank, Status, isNotBlank } from '@chatx/shared'
+import { type User, type OauthTokenResponse, isBlank, Status, isNotBlank, stringifyDbUserName } from '@chatx/shared'
 import { corsHeaders } from '../../api/http/preflight'
-import { queryUserByName } from '../../services/users'
+import { addUser, queryUserByName } from '../../services/users'
 import { testTokenRequest } from '../../utils/test-utils'
 import { handleApiErrors } from '../../utils'
 
+import { v4 as uuidv4 } from 'uuid';
+import { AES as crypto, enc as encoder } from 'crypto-js'
+// NOTE: Save encrypted passwords in DB whenever the password is needed we decrypt in the server 
 const fetchToken = async () => {
     const tokenUrl = String(process.env.JWT_TOKEN_URL)
     const audience = process.env.JWT_AUDIENCE
@@ -55,7 +58,9 @@ export const signInLambda = async (event: APIGatewayProxyEventV2): Promise<APIGa
             }
         }
 
-        if (requestBody.password !== user?.password) {
+        const userPassword = crypto.decrypt(String(user?.password), String(process.env.CRYPTO_SECRET))
+
+        if (requestBody.password !== userPassword.toString(encoder.Utf8)) {
             console.log("Error: DB password and client password do not match!")
             return {
                 statusCode: 401,
@@ -85,6 +90,14 @@ export const signInLambda = async (event: APIGatewayProxyEventV2): Promise<APIGa
         }
 
         const tokenInfo: OauthTokenResponse = await signTokenResponse.json()
+        const payloadUser: User = {
+            id: user?.id,
+            connectionId: user?.connectionId,
+            createdAt: user?.createdAt,
+            username: user?.username,
+            email: user?.email,
+            chatRooms: user?.chatRooms
+        }
 
         return {
             statusCode: 200,
@@ -92,7 +105,9 @@ export const signInLambda = async (event: APIGatewayProxyEventV2): Promise<APIGa
                 ...corsHeaders,
                 "Access-Control-Allow-Origin": requestOrigin
             },
-            body: JSON.stringify({ data: { ...tokenInfo, user } }),
+            body: JSON.stringify({
+                data: { ...tokenInfo, user: payloadUser }
+            }),
         }
     } catch (e) {
         console.log('Error creating token', e)
@@ -124,6 +139,30 @@ export const signUpLambda = async (event): Promise<APIGatewayProxyResultV2> => {
         }
 
         const tokenInfo: OauthTokenResponse = await signTokenResponse.json()
+        const encryptedPassword = crypto.encrypt(String(requestBody.password), String(process.env.CRYPTO_SECRET))
+        const user: User = {
+            id: uuidv4(),
+            createdAt: new Date().toISOString(),
+            email: requestBody.email,
+            username: stringifyDbUserName(requestBody.username, requestBody.email),
+            password: encryptedPassword.toString(),
+            chatRooms: []
+        }
+
+        console.log('Attempting to add new user', JSON.stringify(user))
+
+        const addUserResponse = await addUser(user)
+
+        console.log('Added user to DB', JSON.stringify(addUserResponse))
+
+        const payloadUser: User = {
+            id: user.id,
+            connectionId: "",
+            createdAt: user.createdAt,
+            username: user.username,
+            email: user.email,
+            chatRooms: []
+        }
 
         return {
             statusCode: 200,
@@ -131,7 +170,7 @@ export const signUpLambda = async (event): Promise<APIGatewayProxyResultV2> => {
                 ...corsHeaders,
                 "Access-Control-Allow-Origin": requestOrigin
             },
-            body: JSON.stringify({ data: { ...tokenInfo, user: requestBody } }),
+            body: JSON.stringify({ data: { ...tokenInfo, user: payloadUser } }),
         }
     } catch (e) {
         console.log('Error creating token', e)

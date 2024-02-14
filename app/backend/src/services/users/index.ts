@@ -2,11 +2,13 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import {
     DynamoDBDocumentClient,
     PutCommand,
-    PutCommandInput,
     QueryCommand,
-    UpdateCommandInput,
-    type QueryCommandInput,
+    BatchGetCommand,
     UpdateCommand,
+    type UpdateCommandInput,
+    type PutCommandInput,
+    type QueryCommandInput,
+    type BatchGetCommandInput,
 } from "@aws-sdk/lib-dynamodb"
 
 import {
@@ -16,7 +18,7 @@ import {
     isNotBlank,
     parseDbUserName,
     stringifyDbUserName,
-    isFalsy
+    isFalsy,
 } from "@chatx/shared"
 import { dbConfig } from "../../utils/dynamodb-config"
 import { v4 as uuidv4 } from 'uuid';
@@ -24,26 +26,19 @@ import { v4 as uuidv4 } from 'uuid';
 const client = new DynamoDBClient(dbConfig)
 const ddbDocClient = DynamoDBDocumentClient.from(client)
 
-export const queryUserByName = async (username: string, status?: string): Promise<User | null> => {
+export const queryUserByName = async (username: string, status: string = Status.OFFLINE): Promise<User | null> => {
     const input: QueryCommandInput = {
         ExpressionAttributeNames: {
             "#S": "status"
         },
         ExpressionAttributeValues: {
-            ":status": {
-                S: <Status>status?.toUpperCase()
-            },
-            ":username": {
-                S: username
-            }
+            ":status": <Status>status?.toUpperCase(),
+            ":username": username
         },
+        KeyConditionExpression: "#S = :status",
         FilterExpression: "contains (username, :username)",
         TableName: "chatx-users",
         IndexName: "status-createdAt-index"
-    }
-
-    if (isNotBlank(status)) {
-        input.KeyConditionExpression = "#S = :status"
     }
 
     const command = new QueryCommand(input)
@@ -56,11 +51,13 @@ export const queryUserByName = async (username: string, status?: string): Promis
     console.log("Query response:", JSON.stringify(queryUserResponse.Items))
 
     return {
+        connectionId: queryUserResponse.Items[0].connectionId,
         id: queryUserResponse.Items[0].id,
         username: queryUserResponse.Items[0].username,
         email: queryUserResponse.Items[0].email,
         password: queryUserResponse.Items[0].password,
         createdAt: queryUserResponse.Items[0].createdAt,
+        chatRooms: queryUserResponse.Items[0].chatRooms,
         status: Status.ONLINE
     }
 }
@@ -71,16 +68,12 @@ export const queryUserByConnection = async (connectionId: string, status: string
             "#S": "status"
         },
         ExpressionAttributeValues: {
-            ":status": {
-                S: <Status>status.toUpperCase()
-            },
-            ":connectionId": {
-                S: connectionId
-            },
+            ":status": <Status>status.toUpperCase(),
+            ":connectionId": connectionId,
         },
         KeyConditionExpression: "#S = :status",
         FilterExpression: "connectionId = :connectionId",
-        ProjectionExpression: 'id, username, #S, createdAt, email, connectionId, chatRooms',
+        ProjectionExpression: 'id, username, password, #S, createdAt, email, connectionId, chatRooms',
         TableName: 'chatx-users',
         IndexName: "status-createdAt-index"
     }
@@ -91,27 +84,20 @@ export const queryUserByConnection = async (connectionId: string, status: string
     return isNotBlank(queryUserResponse.Items) ? queryUserResponse.Items[0] : null
 }
 
-export const queryUsers = async (userId: string, status?: string): Promise<User[] | null> => {
+export const queryUsersByStatus = async (status: string, userId?: string): Promise<User[] | null> => {
     const input: QueryCommandInput = {
         ExpressionAttributeNames: {
             "#S": "status"
         },
         ExpressionAttributeValues: {
-            ":status": {
-                S: <Status>status?.toUpperCase()
-            },
-            ":id": {
-                S: userId
-            }
+            ":status": <Status>status?.toUpperCase(),
+            ":id": userId
         },
+        KeyConditionExpression: "#S = :status",
         FilterExpression: "id <> :id",
         ProjectionExpression: 'id, username, #S, createdAt, email, connectionId, chatRooms',
         TableName: 'chatx-users',
         IndexName: "status-createdAt-index"
-    }
-
-    if (isNotBlank(status)) {
-        input.KeyConditionExpression = "#S = :status"
     }
 
     const chatRoomCommand = new QueryCommand(input)
@@ -133,11 +119,7 @@ export const queryUsers = async (userId: string, status?: string): Promise<User[
         status: attr.status as Status
     }))
 
-    let validUsers: boolean = true
-    users.forEach(user => {
-        validUsers = Object.values(user)
-            .every(val => isNotBlank(val) && val !== "undefined")
-    })
+    const validUsers: boolean = users.every(user => isNotBlank(user))
 
     console.log(`Users list: ${JSON.stringify(users)}`, `Is valid: ${validUsers}`)
 
@@ -148,6 +130,20 @@ export const queryUsers = async (userId: string, status?: string): Promise<User[
     return users
 }
 
+export const getUsersByKeys = async (Keys: { id: string; }[]) => {
+    const input: BatchGetCommandInput = {
+        RequestItems: {
+            "chatx-users": { Keys }
+        }
+    }
+
+    const command = new BatchGetCommand(input)
+    const batchCommandResponse = await ddbDocClient.send(command)
+
+    return isNotBlank(batchCommandResponse.Responses) ?
+        batchCommandResponse.Responses["chatx-users"] : []
+}
+
 export const addUser = async (user: User) => {
     const input: PutCommandInput = {
         Item: {
@@ -156,7 +152,7 @@ export const addUser = async (user: User) => {
             username: stringifyDbUserName(user.username, user.email),
             email: user.email,
             password: user.password,
-            chatRooms: [],
+            chatRooms: user.chatRooms || [],
             createdAt: user.createdAt || new Date().toISOString(),
             status: Status.ONLINE
         },
@@ -166,24 +162,32 @@ export const addUser = async (user: User) => {
     return await ddbDocClient.send(command)
 }
 
-export const updateUserConnection = async (id: string, createdAt: string) => {
+export const updateUserConnection = async (id: string, status: Status = Status.OFFLINE, connectionId: string = "") => {
     const input: UpdateCommandInput = {
         ExpressionAttributeNames: {
             "#S": "status"
         },
         ExpressionAttributeValues: {
-            ":status": { S: Status.OFFLINE },
-            ":connectionId": { S: '' }
+            ":status": status,
+            ":connectionId": connectionId
         },
-        Key: {
-            id: {
-                S: id
-            },
-            createdAt: {
-                S: createdAt
-            }
-        },
+        Key: { id },
         UpdateExpression: "SET connectionId = :connectionId, #S = :status",
+        ReturnValues: "ALL_NEW",
+        TableName: 'chatx-users'
+    }
+
+    const command = new UpdateCommand(input)
+    return await ddbDocClient.send(command)
+}
+
+export const updateUserChatRooms = async (id: string, chatRooms: { id: string }[]) => {
+    const input: UpdateCommandInput = {
+        ExpressionAttributeValues: {
+            ":chatRooms": [...chatRooms]
+        },
+        Key: { id },
+        UpdateExpression: "SET chatRooms = :chatRooms",
         ReturnValues: "ALL_NEW",
         TableName: 'chatx-users'
     }

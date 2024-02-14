@@ -11,9 +11,9 @@ import {
 } from "@aws-sdk/client-dynamodb"
 
 import { corsHeaders } from "../api/http/preflight"
-import { SocketAction } from "@chatx/shared/types"
+import { type SocketEvent } from "@chatx/shared/types"
 
-export type sendSocketMessageResponse = {
+export type SocketMessageResponse = {
     result: "ok" | "warn" | "error",
     statusCode: number
     error?: ApiGatewayManagementApiServiceException
@@ -21,9 +21,9 @@ export type sendSocketMessageResponse = {
 
 export const sendSocketMessage = async (
     connections: string[],
-    messageData: { type: SocketAction, message: object },
-    endpoint: string | undefined = process.env.WSSAPI_ENDPOINT
-): Promise<sendSocketMessageResponse> => {
+    messageData: SocketEvent<unknown>,
+    endpoint: string | undefined = process.env.APIG_ENDPOINT
+): Promise<SocketMessageResponse> => {
     try {
         const client = new ApiGatewayManagementApiClient({ endpoint })
 
@@ -37,7 +37,7 @@ export const sendSocketMessage = async (
             return client.send(command)
         })
 
-        console.log('Sending message to connected users!')
+        console.log('Sending message to connected user!')
 
         const postMessagesResponse = await Promise.all(postMessageCommands)
 
@@ -45,7 +45,7 @@ export const sendSocketMessage = async (
         return { statusCode: 200, result: "ok" }
     } catch (e) {
         const error = e as ApiGatewayManagementApiServiceException
-        console.log("Send message error", JSON.stringify(error))
+        console.log("Send message error", JSON.stringify({ ...error, endpoint, connections }))
 
         if (error.$metadata.httpStatusCode === 410 || error.name === "GoneException") {
             console.log('Stale client: Deleting client connectionId from DB')

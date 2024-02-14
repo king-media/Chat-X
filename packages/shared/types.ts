@@ -1,5 +1,6 @@
 export enum SocketAction {
-  NEW_MESSAGE = 'NEW_MESSAGE'
+  NEW_MESSAGE = 'NEW_MESSAGE',
+  INIT = 'INIT'
 }
 
 export enum Status {
@@ -7,11 +8,32 @@ export enum Status {
   ONLINE = "ONLINE"
 }
 
+export interface SocketEvent<T> {
+  action: 'onMessage'
+  type: SocketAction
+  message: { connections?: string[] } | T
+}
+
+export interface InitEvent extends SocketEvent<User['connectionId']> {
+  type: SocketAction.INIT,
+  message: User['connectionId'],
+  metadata?: {
+    userId?: string,
+    user?: User | null,
+    userChatRooms?: { id: string }[] | null,
+    chatList?: ChatList | null
+  }
+}
+export interface NewMessageEvent extends SocketEvent<Message> {
+  type: SocketAction.NEW_MESSAGE,
+  message: Message
+}
+
 export type Chat = {
   id: string,
   users: {
     id: string;
-    createdAt: string;
+    username: string;
   }[],
   createdAt: string
 }
@@ -29,13 +51,11 @@ export type User = {
   createdAt?: string;
   status?: Status;
   connectionId?: string;
-  chatRooms?: {
-    id: string;
-    createdAt: string;
-  }[] | null
+  chatRooms?: { id: string }[] | null
 }
 
 export type Message = {
+  id?: string,
   chatId: string,
   senderId: string,
   connections?: string[],

@@ -1,6 +1,6 @@
 import type { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda'
 
-import { type User, Status, parseDbUserName } from '@chatx/shared';
+import { type User, Status, parseDbUserName, isBlank } from '@chatx/shared';
 import { queryUserByConnection, updateUserConnection } from '../../services/users';
 
 export const disconnectHandler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
@@ -9,9 +9,17 @@ export const disconnectHandler = async (event: APIGatewayEvent): Promise<APIGate
 
         const user = await queryUserByConnection(connectionId, Status.ONLINE)
 
-        console.log('Sending User put operation on DB')
+        if (isBlank(user)) {
+            console.log('user not updated: User not found!', JSON.stringify(user))
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ data: 'Error updating user! User was not found!' })
+            }
+        }
 
-        const updateUserResponse = await updateUserConnection(user?.id, user?.createdAt)
+        console.log('Sending User put operation on DB:', JSON.stringify(user))
+
+        const updateUserResponse = await updateUserConnection(user?.id)
 
         if (updateUserResponse.$metadata.httpStatusCode !== 200 || !updateUserResponse.Attributes) {
             console.log('user not updated', JSON.stringify(updateUserResponse))

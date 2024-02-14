@@ -1,24 +1,24 @@
 import type { APIGatewayProxyResultV2 } from 'aws-lambda'
 
-import { PutCommandOutput } from '@aws-sdk/lib-dynamodb'
+import { BatchWriteCommandOutput } from '@aws-sdk/lib-dynamodb'
 
 import { Message } from '@chatx/shared'
 
 import { mockMessages } from "../../../api/test/mocks";
 import { createResponse, mockLambdaProxyArgs } from "../../../utils/test-utils"
 
-import { getMessagesByChatId, addMessageToDb } from '../../../services/messages'
-import { getChatMessages, addChatMessage } from '../index';
+import { getMessagesByChatId, addMessagesToDb } from '../../../services/messages'
+import { getChatMessages, addChatMessages } from '../index';
 import { DynamoDBServiceException, ResourceNotFoundException } from '@aws-sdk/client-dynamodb';
 
 jest.mock('../../../services/messages', () => ({
     _esModule: true,
     getMessagesByChatId: jest.fn(),
-    addMessageToDb: jest.fn()
+    addMessagesToDb: jest.fn()
 }))
 
 const mockGetMessagesByChatId = getMessagesByChatId as jest.Mock<Promise<Message[]>>
-const mockAddChatMessages = addMessageToDb as jest.Mock<Promise<PutCommandOutput>>
+const mockAddMessagesToDb = addMessagesToDb as jest.Mock<Promise<BatchWriteCommandOutput>>
 
 describe('Messages Route', () => {
     let expectedQueryResponse, expectedMessages
@@ -28,7 +28,6 @@ describe('Messages Route', () => {
         expectedMessages = [
             {
                 chatId: mockMessages[0].chatId,
-                connections: <string[]>mockMessages[0].connections,
                 senderId: mockMessages[0].senderId,
                 text: mockMessages[0].text,
                 createdAt: mockMessages[0].createdAt,
@@ -36,7 +35,6 @@ describe('Messages Route', () => {
             },
             {
                 chatId: mockMessages[0].chatId,
-                connections: <string[]>mockMessages[0].connections,
                 senderId: mockMessages[1].senderId,
                 text: mockMessages[1].text,
                 createdAt: mockMessages[1].createdAt,
@@ -47,7 +45,7 @@ describe('Messages Route', () => {
         expectedQueryResponse = { $metadata: { httpStatusCode: 200 } }
 
         mockGetMessagesByChatId.mockResolvedValue(expectedMessages)
-        mockAddChatMessages.mockResolvedValue(expectedQueryResponse)
+        mockAddMessagesToDb.mockResolvedValue(expectedQueryResponse)
     })
 
     describe('When getChatMessages is called', () => {
@@ -123,23 +121,23 @@ describe('Messages Route', () => {
         })
     })
 
-    describe('When addChatMessage is called', () => {
-        it('should add message and notify client.', async () => {
+    describe('When addChatMessages is called', () => {
+        it('should add messages and notify client.', async () => {
             const chatId = mockMessages[0].chatId;
             const { event } = mockLambdaProxyArgs({
                 headers: { origin: "example.com" },
                 pathParameters: { chatId },
-                body: JSON.stringify({
+                body: JSON.stringify([{
                     ...mockMessages[0],
                     text: "Im here brodie",
                     senderId: mockMessages[1].senderId
-                })
+                }])
             })
 
-            const response = await addChatMessage(event)
+            const response = await addChatMessages(event)
             const expectedResponse: APIGatewayProxyResultV2 = createResponse(
                 200,
-                `Added message to chat: ${chatId}`,
+                `Added messages to chat: ${chatId}`,
                 { "Access-Control-Allow-Origin": "example.com" }
             )
 
@@ -150,7 +148,7 @@ describe('Messages Route', () => {
             const errorName = "Unknown Error From DB";
             const errorMessage = "Something happened over here...";
 
-            mockAddChatMessages.mockRejectedValueOnce(
+            mockAddMessagesToDb.mockRejectedValueOnce(
                 new DynamoDBServiceException({
                     $metadata: { httpStatusCode: 500 },
                     $fault: "client",
@@ -168,7 +166,7 @@ describe('Messages Route', () => {
                 })
             })
 
-            const response = await addChatMessage(event)
+            const response = await addChatMessages(event)
             const expectedResponse: APIGatewayProxyResultV2 = createResponse(
                 500,
                 `${errorName}: ${errorMessage}`,

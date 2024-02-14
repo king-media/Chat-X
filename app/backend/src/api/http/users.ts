@@ -1,10 +1,11 @@
 import type { APIGatewayProxyHandlerV2 } from 'aws-lambda'
-import { getUserByUsername, getUsersByStatus } from '../../routes/users';
+import { getUserByUsername, getUsersByPrimaryKey, getUsersByStatus } from '../../routes/users';
 import { corsHeaders } from './preflight';
 
 export enum UsersRouteKeys {
     UsersByStatusEvent = "GET /users/{status}",
-    UserByName = "GET /users/get/{username}"
+    UsersByPrimaryKey = "GET /users/get",
+    UserByName = "GET /users/get/{username}",
 }
 
 export const handler: APIGatewayProxyHandlerV2 = async (event, context) => {
@@ -20,6 +21,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event, context) => {
 
         case UsersRouteKeys.UserByName:
             return getUserByUsername(event)
+        case UsersRouteKeys.UsersByPrimaryKey:
+            return getUsersByPrimaryKey(event)
         default:
             console.log('Invalid route given')
             return {

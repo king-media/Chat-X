@@ -14,4 +14,15 @@ export {
 } from './guards'
 export { parseDbUserName, stringifyDbUserName } from './user'
 export { camelCase, capitalize, replaceAt } from './string'
-export { type Chat, type ChatList, type User, type Message, type OauthTokenResponse, Status, SocketAction } from './types'
+export {
+    type Chat,
+    type ChatList,
+    type User,
+    type Message,
+    type OauthTokenResponse,
+    type SocketEvent,
+    type InitEvent,
+    type NewMessageEvent,
+    Status,
+    SocketAction
+} from './types'

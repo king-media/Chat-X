@@ -1,5 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import {
+    BatchWriteCommand,
+    BatchWriteCommandInput,
     DynamoDBDocumentClient,
     PutCommand,
     QueryCommand,
@@ -10,15 +12,43 @@ import {
 import type { Message } from "@chatx/shared"
 import { dbConfig } from "../../utils/dynamodb-config"
 
+import { v4 as uuidv4 } from 'uuid';
+
 const client = new DynamoDBClient(dbConfig)
 const ddbDocClient = DynamoDBDocumentClient.from(client)
+
+export const addMessagesToDb = async (messages: Message[]) => {
+    const items = messages.map(message => ({
+        PutRequest: {
+            Item: {
+                id: message.id || uuidv4(),
+                chatId: message.chatId,
+                senderId: message.senderId,
+                text: message.text,
+                createdAt: message.createdAt || new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            }
+        }
+    }))
+
+    const input: BatchWriteCommandInput = {
+        RequestItems: {
+            "chatx-messages": items
+        }
+    }
+
+    const command = new BatchWriteCommand(input)
+    const batchMessagesResponse = await ddbDocClient.send(command)
+
+    return batchMessagesResponse
+}
 
 export const addMessageToDb = async (message: Message) => {
     const input: PutCommandInput = {
         Item: {
+            id: uuidv4(),
             chatId: message.chatId,
             senderId: message.senderId,
-            connections: message.connections || [""],
             text: message.text,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -51,7 +81,7 @@ export const getMessagesByChatId = async (chatId: string): Promise<Message[] | n
 
     return messagesResponse.Items.map(attr => ({
         chatId,
-        connections: attr.connections,
+        id: attr.id,
         senderId: attr.senderId,
         text: attr.text,
         createdAt: attr.createdAt,

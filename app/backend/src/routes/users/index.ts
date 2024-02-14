@@ -2,7 +2,7 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda
 
 import { Status, isBlank } from '@chatx/shared'
 import { corsHeaders } from '../../api/http/preflight'
-import { queryUsers, queryUserByName } from '../../services/users'
+import { queryUsersByStatus, queryUserByName, getUsersByKeys } from '../../services/users'
 import { handleApiErrors } from '../../utils'
 
 export const getUsersByStatus = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
@@ -10,7 +10,7 @@ export const getUsersByStatus = async (event: APIGatewayProxyEventV2): Promise<A
 
     try {
         const status = String(event.pathParameters?.status).toUpperCase()
-        const userId = String(event.queryStringParameters)
+        const userId = event.queryStringParameters?.userId
 
         //@ts-expect-error This error is stupid
         if (isBlank(status) || !Object.values(Status).includes(status)) {
@@ -27,7 +27,7 @@ export const getUsersByStatus = async (event: APIGatewayProxyEventV2): Promise<A
 
         console.log('getting list of user\'s from DB')
 
-        const users = await queryUsers(userId, status)
+        const users = await queryUsersByStatus(status, userId)
 
         if (isBlank(users)) {
             console.log("DB Error: Users were not found!")
@@ -105,4 +105,53 @@ export const getUserByUsername = async (event: APIGatewayProxyEventV2): Promise<
         console.log('Error getting user', JSON.stringify(e))
         return handleApiErrors(e, requestOrigin, 'User')
     }
+}
+
+export const getUsersByPrimaryKey = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+    const requestOrigin = String(event.headers.origin)
+
+    try {
+        if (isBlank(event.queryStringParameters?.usersPrimaryKeys)) {
+            console.log("Request error: Primary keys were not given.")
+            return {
+                statusCode: 400,
+                headers: {
+                    ...corsHeaders,
+                    "Access-Control-Allow-Origin": requestOrigin
+                },
+                body: JSON.stringify({ data: `Bad Request: Include a list of primary keys.` })
+            }
+        }
+
+        const userPrimaryKeys: { id: string; }[] = JSON.parse(String(event.queryStringParameters?.usersPrimaryKeys))
+
+        console.log('getting list of user\'s from DB')
+
+        const users = await getUsersByKeys(userPrimaryKeys)
+
+        if (isBlank(users)) {
+            console.log("DB Error: Users were not found!")
+            return {
+                statusCode: 404,
+                headers: {
+                    ...corsHeaders,
+                    "Access-Control-Allow-Origin": requestOrigin
+                },
+                body: JSON.stringify({ data: 'Not Found: Users were not found!' })
+            }
+        }
+
+        return {
+            statusCode: 200,
+            headers: {
+                ...corsHeaders,
+                "Access-Control-Allow-Origin": requestOrigin
+            },
+            body: JSON.stringify({ data: users })
+        }
+    } catch (e) {
+        console.log('Error getting users', JSON.stringify(e))
+        return handleApiErrors(e, requestOrigin, 'Users')
+    }
+
 }

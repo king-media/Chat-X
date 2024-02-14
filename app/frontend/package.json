@@ -1,7 +1,7 @@
 {
   "name": "@chatx/frontend",
   "private": true,
-  "version": "0.4.2",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,8 +16,6 @@
   "dependencies": {
     "@aws-sdk/client-api-gateway": "3.478.0",
     "@chatx/shared": "workspace:*",
-    "@types/crypto-js": "^4.2.1",
-    "crypto-js": "^4.2.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.0"
   },

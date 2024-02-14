@@ -50,7 +50,7 @@ describe.skip('$Connect Route', () => {
                 "User added to DB and connection",
             )
 
-            delete expectedResponse.headers["Access-Control-Allow-Origin"]
+            delete expectedResponse.headers
             expect(response).toStrictEqual(expectedResponse)
         })
 
@@ -58,7 +58,6 @@ describe.skip('$Connect Route', () => {
             mockAddUser.mockResolvedValue([])
 
             const { event } = mockLambdaProxyArgs({
-                headers: { origin: "example.com" },
                 pathParameters: { userId: "send1" },
                 queryStringParameters: {
                     chats: JSON.stringify(requestedChat)
@@ -72,6 +71,7 @@ describe.skip('$Connect Route', () => {
                 { "Access-Control-Allow-Origin": "example.com" }
             )
 
+            delete expectedResponse.headers
             expect(response).toStrictEqual(expectedResponse)
 
             mockAddUser.mockClear()

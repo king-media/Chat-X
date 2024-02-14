@@ -14,6 +14,7 @@ export type CurrentUser = {
 }
 export interface FetchResponse<T> {
     data?: T | null;
+    status: number;
     error?: string;
 }
 

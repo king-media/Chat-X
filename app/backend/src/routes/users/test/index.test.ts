@@ -6,27 +6,36 @@ import { Status, type User } from '@chatx/shared'
 import { mockUser, mockUsers } from "../../../api/test/mocks";
 import { createResponse, mockLambdaProxyArgs } from "../../../utils/test-utils"
 
-import { queryUsers, queryUserByName } from '../../../services/users'
-import { getUserByUsername, getUsersByStatus } from '../index';
+import {
+    queryUsersByStatus,
+    getUsersByKeys,
+    queryUserByConnection,
+    queryUserByName
+} from '../../../services/users'
+import { getUserByUsername, getUsersByPrimaryKey, getUsersByStatus } from '../index';
 import { DynamoDBServiceException } from '@aws-sdk/client-dynamodb';
 
 jest.mock('../../../services/users', () => ({
     _esModule: true,
     queryUserByName: jest.fn(),
-    queryUsers: jest.fn()
+    queryUsersByStatus: jest.fn(),
+    getUsersByKeys: jest.fn(),
+    queryUserByConnection: jest.fn()
 }))
 
-const mockQueryUsers = queryUsers as jest.Mock<Promise<User[] | null>>
+const mockQueryUsersByStatus = queryUsersByStatus as jest.Mock<Promise<User[] | null>>
+const mockGetUsersByKeys = getUsersByKeys as jest.Mock<Promise<User[] | null>>
 const mockQueryUser = queryUserByName as jest.Mock<Promise<User | null>>
 
 describe('Users Route', () => {
-    let expectedUsers
+    let expectedUsers: User[]
 
     beforeEach(() => {
         // Reset mock values & set vars;
         expectedUsers = [mockUser]
 
-        mockQueryUsers.mockResolvedValue(expectedUsers)
+        mockQueryUsersByStatus.mockResolvedValue(expectedUsers)
+        mockGetUsersByKeys.mockResolvedValue(expectedUsers)
         mockQueryUser.mockResolvedValue(mockUser)
     })
 
@@ -50,7 +59,7 @@ describe('Users Route', () => {
             expect(response).toStrictEqual(expectedResponse)
 
             expectedUsers = [mockUsers[1]]
-            mockQueryUsers.mockResolvedValue(expectedUsers)
+            mockQueryUsersByStatus.mockResolvedValue(expectedUsers)
             eventVals.pathParameters.status = Status.OFFLINE
             eventVals.queryStringParameters.id = mockUsers[0].id
 
@@ -99,7 +108,7 @@ describe('Users Route', () => {
                 queryStringParameters: { id: mockUsers[1].id }
             }
 
-            mockQueryUsers.mockResolvedValue(null)
+            mockQueryUsersByStatus.mockResolvedValue(null)
 
             const { event } = mockLambdaProxyArgs(eventVals)
 
@@ -117,7 +126,7 @@ describe('Users Route', () => {
             const errorName = "Unknown Error From DB";
             const errorMessage = "Something happened over here...";
 
-            mockQueryUsers.mockRejectedValue(new DynamoDBServiceException({
+            mockQueryUsersByStatus.mockRejectedValue(new DynamoDBServiceException({
                 $metadata: { httpStatusCode: 500 },
                 $fault: "client",
                 name: errorName,
@@ -133,6 +142,100 @@ describe('Users Route', () => {
             const { event } = mockLambdaProxyArgs(eventVals)
 
             const response = await getUsersByStatus(event)
+            const expectedResponse: APIGatewayProxyResultV2 = createResponse(
+                500,
+                `${errorName}: ${errorMessage}`,
+                { "Access-Control-Allow-Origin": "example.com" }
+            )
+
+            expect(response).toStrictEqual(expectedResponse)
+        })
+    })
+
+    describe('When getUsersByPrimaryKey is called', () => {
+        it('should return users based on primary keys passed.', async () => {
+            const usersPrimaryKeys = expectedUsers.map(user => ({ id: user.id, createdAt: user.createdAt }))
+            const eventVals = {
+                headers: { origin: "example.com" },
+                queryStringParameters: { usersPrimaryKeys: JSON.stringify(usersPrimaryKeys) }
+            }
+
+            const { event } = mockLambdaProxyArgs(eventVals)
+
+            const response = await getUsersByPrimaryKey(event)
+            const expectedResponse: APIGatewayProxyResultV2 = createResponse(
+                200,
+                expectedUsers,
+                { "Access-Control-Allow-Origin": "example.com" }
+            )
+
+            expect(response).toStrictEqual(expectedResponse)
+        })
+
+        it('should throw 400 bad request of no primary keys are given or empty users given.', async () => {
+            const error = `Bad Request: Include a list of primary keys.`
+            const eventVals = {
+                headers: { origin: "example.com" },
+                queryStringParameters: { usersPrimaryKeys: undefined }
+            }
+
+            const { event } = mockLambdaProxyArgs(eventVals)
+
+            let response = await getUsersByPrimaryKey(event)
+            const expectedResponse: APIGatewayProxyResultV2 = createResponse(
+                400,
+                error,
+                { "Access-Control-Allow-Origin": "example.com" }
+            )
+
+            expect(response).toStrictEqual(expectedResponse)
+
+            const { event: event2 } = mockLambdaProxyArgs({ ...eventVals, pathParameters: undefined })
+
+            response = await getUsersByPrimaryKey(event2)
+            expect(response).toStrictEqual(expectedResponse)
+        })
+
+        it('should return 404 if no users are found', async () => {
+            const error = "Not Found: Users were not found!"
+            const eventVals = {
+                headers: { origin: "example.com" },
+                queryStringParameters: { usersPrimaryKeys: JSON.stringify(expectedUsers) }
+            }
+
+            mockGetUsersByKeys.mockResolvedValue([])
+
+            const { event } = mockLambdaProxyArgs(eventVals)
+
+            const response = await getUsersByPrimaryKey(event)
+            const expectedResponse: APIGatewayProxyResultV2 = createResponse(
+                404,
+                error,
+                { "Access-Control-Allow-Origin": "example.com" }
+            )
+
+            expect(response).toStrictEqual(expectedResponse)
+        })
+
+        it('should return 500 if DB request fails', async () => {
+            const errorName = "Unknown Error From DB";
+            const errorMessage = "Something happened over here...";
+
+            mockGetUsersByKeys.mockRejectedValue(new DynamoDBServiceException({
+                $metadata: { httpStatusCode: 500 },
+                $fault: "client",
+                name: errorName,
+                message: errorMessage
+            }))
+
+            const eventVals = {
+                headers: { origin: "example.com" },
+                queryStringParameters: { usersPrimaryKeys: JSON.stringify(expectedUsers) }
+            }
+
+            const { event } = mockLambdaProxyArgs(eventVals)
+
+            const response = await getUsersByPrimaryKey(event)
             const expectedResponse: APIGatewayProxyResultV2 = createResponse(
                 500,
                 `${errorName}: ${errorMessage}`,

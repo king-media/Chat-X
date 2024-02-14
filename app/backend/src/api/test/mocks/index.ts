@@ -2,6 +2,7 @@ import { Status, type ChatList, type Message, type User } from "@chatx/shared";
 
 export const mockMessages: Message[] = [
     {
+        id: "1",
         chatId: "1",
         senderId: "send1",
         connections: [],
@@ -10,6 +11,7 @@ export const mockMessages: Message[] = [
         updatedAt: ""
     },
     {
+        id: "2",
         chatId: "2",
         senderId: "send1",
         connections: [],
@@ -23,18 +25,18 @@ export const mockRooms: ChatList = [
     {
         chat: {
             id: "1",
-            users: [{ id: "send1", createdAt: "01/10/2024" }, { id: "send2", createdAt: "01/10/2024" }],
+            users: [{ id: "send1", username: "johnny" }, { id: "send2", username: "larry" }],
             createdAt: ""
         },
-        recipientUsers: [{ id: "send2", createdAt: "01/10/2024" }]
+        recipientUsers: [{ id: "send2", createdAt: "01/10/2024", username: "larry" }]
     },
     {
         chat: {
             id: "2",
-            users: [{ id: "user2", createdAt: "01/10/2024" }, { id: "user3", createdAt: "01/10/2024" }],
+            users: [{ id: "user2", username: "larry" }, { id: "user3", username: "johnny" }],
             createdAt: ""
         },
-        recipientUsers: [{ id: "user3", createdAt: "01/10/2024" }]
+        recipientUsers: [{ id: "user3", username: "johnny" }]
     }
 ]
 
@@ -55,7 +57,8 @@ export const mockUser: User = {
     email: 'email@email.com',
     password: 'darealest1',
     createdAt: '01/15/2024',
-    status: Status.ONLINE
+    status: Status.ONLINE,
+    chatRooms: []
 }
 
 export const mockUsers: User[] = [
@@ -66,6 +69,7 @@ export const mockUsers: User[] = [
         email: 'emailfake@gezly.com',
         password: 'cookielfft',
         createdAt: '01/16/2024',
-        status: Status.OFFLINE
+        status: Status.OFFLINE,
+        chatRooms: []
     }
 ]

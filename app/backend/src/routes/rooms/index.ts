@@ -2,17 +2,30 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { isBlank, type Chat, isFalsy } from '@chatx/shared'
+import { isBlank, isFalsy, type Chat, type User } from '@chatx/shared'
 import { corsHeaders } from '../../api/http/preflight';
 import { addChatRoom, getChatList } from '../../services/rooms';
 import { handleApiErrors } from '../../utils';
+import { updateUserChatRooms } from '../../services/users';
 
 export const getUserRooms = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     const requestOrigin = String(event.headers.origin)
 
     try {
         const userId = String(event.pathParameters?.userId)
-        const chats: { id: string, createdAt: string }[] = JSON.parse(String(event.queryStringParameters?.chats))
+
+        if (!event.queryStringParameters?.chats || isBlank(JSON.parse(event.queryStringParameters.chats))) {
+            return {
+                statusCode: 400,
+                headers: {
+                    ...corsHeaders,
+                    "Access-Control-Allow-Origin": requestOrigin
+                },
+                body: JSON.stringify({ data: 'Not Found: No chat rooms given!' })
+            }
+        }
+
+        const chats: { id: string }[] = JSON.parse(event.queryStringParameters.chats)
 
         console.log('getting list of user\'s chat rooms from DB')
 
@@ -26,7 +39,7 @@ export const getUserRooms = async (event: APIGatewayProxyEventV2): Promise<APIGa
                     ...corsHeaders,
                     "Access-Control-Allow-Origin": requestOrigin
                 },
-                body: JSON.stringify({ data: 'Not Found: Chat room not found!' })
+                body: JSON.stringify({ data: 'Not Found: Chat rooms not found!' })
             }
         }
 
@@ -40,7 +53,7 @@ export const getUserRooms = async (event: APIGatewayProxyEventV2): Promise<APIGa
         }
     } catch (e) {
         console.log('Error getting chats', e)
-        return handleApiErrors<APIGatewayProxyResultV2>(e, requestOrigin, "Chat room")
+        return handleApiErrors<APIGatewayProxyResultV2>(e, requestOrigin, "Chat rooms")
     }
 }
 
@@ -62,7 +75,7 @@ export const addUserRoom = async (event: APIGatewayProxyEventV2): Promise<APIGat
             }
         }
 
-        const body: { id: string, createdAt: string }[] = JSON.parse(event.body)
+        const body: { id: string, createdAt: string, username: string, chatRooms: { id: string }[] }[] = JSON.parse(event.body)
 
         if (isFalsy(body.some(user => user.id === userId))) {
             console.log("Error: Need to included user as a chat member.")
@@ -76,16 +89,24 @@ export const addUserRoom = async (event: APIGatewayProxyEventV2): Promise<APIGat
             }
         }
 
-        const Item: Chat = {
+        const chat: Chat = {
             id: uuidv4(),
-            users: body,
+            users: body.map(({ id, createdAt, username }) => ({ id, createdAt, username })),
             createdAt: new Date().toISOString()
         }
 
-        const putChatsResponse = await addChatRoom(Item)
+        const recipientUsers: User[] = chat.users.filter(user => user.id !== userId)
+        const putChatsResponse = await addChatRoom(chat)
+
+        const updateUsersChats = body.map(user => updateUserChatRooms(user.id, [...user.chatRooms, { id: chat.id }]))
+
+        const updatedChatsResponse = await Promise.all(updateUsersChats)
+
+        console.log('update userChats', JSON.stringify(updatedChatsResponse))
 
         if (putChatsResponse.$metadata.httpStatusCode !== 200) {
-            console.log(`DB Error: failed: ${putChatsResponse}`)
+            console.log(`DB Error: ${putChatsResponse}`)
+
             return {
                 statusCode: 500,
                 headers: {
@@ -102,7 +123,7 @@ export const addUserRoom = async (event: APIGatewayProxyEventV2): Promise<APIGat
                 ...corsHeaders,
                 "Access-Control-Allow-Origin": requestOrigin
             },
-            body: JSON.stringify({ data: Item })
+            body: JSON.stringify({ data: { chat, recipientUsers } })
         }
     } catch (e) {
         console.log('Error updating chat DB', e)

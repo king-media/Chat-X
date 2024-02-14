@@ -1,6 +1,6 @@
 const awsEnvs = ['production', 'staging']
 
-export const isLocal = process.env.JEST_WORKER_ID || !awsEnvs.includes(String(process.env.ENVIRONMENT));
+export const isLocal = process.env.JEST_WORKER_ID || !awsEnvs.includes(String(process.env.ACCESS_ENV));
 
 export const dbConfig = {
     ...(isLocal && {

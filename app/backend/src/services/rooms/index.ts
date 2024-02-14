@@ -6,15 +6,15 @@ import {
     PutCommandInput,
     PutCommand,
 } from "@aws-sdk/lib-dynamodb"
-import type { Chat, ChatList, Status, User } from "@chatx/shared"
+import { isBlank, type Chat, type ChatList, type Status, type User } from "@chatx/shared"
 import { dbConfig } from "../../utils/dynamodb-config"
 
 const client = new DynamoDBClient(dbConfig)
 const ddbDocClient = DynamoDBDocumentClient.from(client)
 
-type ChatRooms = { id: string, createdAt: string }[]
+type ChatKeys = { id: string }[]
 
-export const getChatList = async (Keys: ChatRooms, userId: string): Promise<ChatList | null> => {
+export const getChatList = async (Keys: ChatKeys, userId: string): Promise<ChatList | null> => {
     const input: BatchGetCommandInput = {
         RequestItems: {
             "chatx-rooms": {
@@ -42,20 +42,15 @@ export const getChatList = async (Keys: ChatRooms, userId: string): Promise<Chat
 
     console.log(`Creating user keys for next query based on: ${JSON.stringify(chatRooms)}`)
 
-    const userKeys = chatRooms.reduce<Chat["users"]>((prev, room) => {
+    const userKeys = chatRooms.reduce<{ id: string }[]>((prev, room) => {
         const recipientKeys = room.users.filter(user => user.id !== userId)
             .map(recipient => ({
-                id: recipient.id,
-                createdAt: recipient.createdAt
+                id: recipient.id
             }));
 
-        const containsId = recipientKeys.some(key => prev.includes(key))
+        const dupelesIds = recipientKeys.filter(key => isBlank(prev.find(({ id }) => id === key.id)))
 
-        if (containsId) {
-            return prev
-        }
-
-        return [...prev, ...recipientKeys]
+        return [...prev, ...dupelesIds]
     }, [])
 
     console.log(`List of userKeys: ${JSON.stringify(userKeys)}`)

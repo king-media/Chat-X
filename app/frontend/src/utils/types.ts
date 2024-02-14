@@ -12,7 +12,7 @@ export interface IFormSubmitEvent extends SubmitEvent {
 }
 
 export type ComponentProps = {
-    appState?: AppState;
+    appState?: typeof AppState;
     routeState?: RouteProps['routeParams'];
     pageState?: Record<string, unknown>;
 }

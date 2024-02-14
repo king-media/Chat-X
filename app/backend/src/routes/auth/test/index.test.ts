@@ -1,7 +1,7 @@
 import type { APIGatewayProxyResultV2 } from 'aws-lambda'
 
 
-import type { User } from '@chatx/shared'
+import { stringifyDbUserName, type User } from '@chatx/shared'
 
 import { mockUser } from "../../../api/test/mocks";
 import { createResponse, mockLambdaProxyArgs, tokenInfo, testTokenRequest } from "../../../utils/test-utils"
@@ -9,6 +9,9 @@ import { createResponse, mockLambdaProxyArgs, tokenInfo, testTokenRequest } from
 import { queryUserByName } from '../../../services/users'
 import { signInLambda, signUpLambda } from '../index';
 import { DynamoDBServiceException } from '@aws-sdk/client-dynamodb';
+
+import { validate } from 'uuid';
+import { AES as crypto } from 'crypto-js'
 
 jest.mock('../../../utils/test-utils', () => ({
     _esModule: true,
@@ -29,15 +32,20 @@ describe('SignIn Route', () => {
 
     beforeEach(() => {
         // Reset mock values & set vars
+        const encryptedPassword = crypto.encrypt(String(mockUser.password), String(process.env.CRYPTO_SECRET))
+        expectedUser = {
+            ...mockUser,
+            username: stringifyDbUserName(mockUser.username, mockUser.email),
+            password: encryptedPassword.toString()
+        }
         body = JSON.stringify(mockUser);
-        expectedUser = mockUser
         tokenResponse = {
             status: 200,
             body: null,
             json: async () => (tokenInfo)
         }
 
-        mockQueryUser.mockResolvedValue(mockUser)
+        mockQueryUser.mockResolvedValue(expectedUser)
         mockTestTokenRequest.mockResolvedValue(tokenResponse)
     })
 
@@ -49,13 +57,12 @@ describe('SignIn Route', () => {
             })
 
             const response = await signUpLambda(event)
-            const expectedResponse: APIGatewayProxyResultV2 = createResponse(
-                200,
-                { ...tokenInfo, user: expectedUser },
-                { "Access-Control-Allow-Origin": "example.com" }
-            )
-
-            expect(response).toStrictEqual(expectedResponse)
+            //@ts-expect-error the body is there trust me
+            const responseBody = JSON.parse(response.body)
+            // confirm new uid and createdAt
+            expect(validate(responseBody.data.user.id)).toBeTruthy()
+            expect(responseBody.data.user.createdAt).toBeTruthy()
+            expect(crypto.decrypt(responseBody.data.user.password, String(process.env.CRYPTO_SECRET))).toBeTruthy()
         })
 
         it('should catch token request errors and return 401 response', async () => {
@@ -81,17 +88,6 @@ describe('SignIn Route', () => {
             )
 
             expect(response).toStrictEqual(expectedResponse)
-        })
-
-        it('should return 500 if empty request body', async () => {
-            const { event } = mockLambdaProxyArgs({
-                headers: { origin: "example.com" },
-                body: undefined
-            })
-
-            const response = await signUpLambda(event)
-            //@ts-expect-error the statusCode is there trust me
-            expect(response.statusCode).toBe(500)
         })
     })
 

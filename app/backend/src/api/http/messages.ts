@@ -1,5 +1,5 @@
 import type { APIGatewayProxyHandlerV2 } from 'aws-lambda'
-import { getChatMessages, addChatMessage } from '../../routes/messages';
+import { getChatMessages, addChatMessages } from '../../routes/messages';
 import { corsHeaders } from './preflight';
 
 export enum MessagesRouteKeys {
@@ -19,7 +19,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event, context) => {
             return getChatMessages(event)
 
         case MessagesRouteKeys.AddMessageEvent:
-            return addChatMessage(event)
+            return addChatMessages(event)
 
         default:
             console.log('Invalid route given')

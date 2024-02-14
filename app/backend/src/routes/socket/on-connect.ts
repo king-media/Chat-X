@@ -1,40 +1,36 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
-import { type User } from '@chatx/shared';
+import { Status, isBlank } from '@chatx/shared';
 
-import { addUser } from '../../services/users';
-import { corsHeaders } from '../../api/http/preflight';
+import { updateUserConnection } from '../../services/users';
 
 
 export const connectHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const { connectionId } = event.requestContext
 
-        if (!event.queryStringParameters) {
+        if (!event.queryStringParameters || isBlank(event.queryStringParameters.userId)) {
             return {
-                ...corsHeaders,
                 statusCode: 400,
                 body: JSON.stringify({ data: 'Error adding user: Must include user info as query string params.' })
             }
         }
 
-        const user: User = { ...event.queryStringParameters, connectionId }
+        const userId = String(event.queryStringParameters.userId)
 
         console.log('Sending User put operation on DB')
 
-        const putUserResponse = await addUser(user)
+        const updateUserResponse = await updateUserConnection(userId, Status.ONLINE, connectionId)
 
-        if (putUserResponse.$metadata.httpStatusCode !== 200) {
-            console.log('user not added', JSON.stringify(putUserResponse))
+        if (updateUserResponse.$metadata.httpStatusCode !== 200) {
+            console.log('user not added', JSON.stringify(updateUserResponse))
             return {
-                ...corsHeaders,
-                statusCode: Number(putUserResponse.$metadata.httpStatusCode),
+                statusCode: Number(updateUserResponse.$metadata.httpStatusCode),
                 body: JSON.stringify({ data: 'Error adding user!' })
             }
         }
 
         return {
-            ...corsHeaders,
             statusCode: 200,
             body: JSON.stringify({
                 data: "User added to DB and connection"
@@ -43,7 +39,6 @@ export const connectHandler = async (event: APIGatewayProxyEvent): Promise<APIGa
     } catch (e) {
         console.log('Error connecting user', JSON.stringify(e))
         return {
-            ...corsHeaders,
             statusCode: 500,
             body: JSON.stringify({ data: `User not added ${e}` })
         }

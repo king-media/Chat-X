@@ -90,6 +90,20 @@ const Login: Route['component'] = async (props) => {
         }
     }
 
+    /*
+        Auth Flow:
+        - Signup/Signin:
+            * Payload: { username, email(signup), password }
+            * The user sends the above payload I authenticate (OAuth) and send back { token, user }
+            * If the user is signing up I add the user to the DB
+            * I store the return auth DTO in local storage & state.
+            * I then send the user.id on socket handshake request (onConnect) and Update the user in the DB w/ the connectionId
+            * On the client, I use "onconnect" in order to confirm connection and setup the UI. I also store new user data w/ connectionId in state.
+                - A "init" message within the "onconnect" function in order to get connectionId, chatList and chatRoom data for rendering.
+        - Returning User (Authed):
+            * Get user data from local storage. (I always update local storage on disconnect so this data should be good to go.)
+            + Run the above $connect steps.
+    */
     const handleSubmit = async (e: SubmitEvent, signin: boolean): Promise<void> => {
         const event = <IFormSubmitEvent>e
         const elements = Array.from(event?.target?.elements)
@@ -110,10 +124,10 @@ const Login: Route['component'] = async (props) => {
         const validation = validateForm(signin ? signInSchema : signUpSchema, body)
 
         if (validation.isValid) {
-            const authResponse = await authenticate(signin, <FormBody>body)
+            const authUser = await authenticate(signin, <FormBody>body)
 
-            if (authResponse?.socketConnection) {
-                props?.appState?.setState({ user: authResponse.user, socketConnection: authResponse.socketConnection })
+            if (isNotBlank(authUser)) {
+                props?.appState?.setState({ user: authUser })
                 navigateTo("/")
             } else {
                 throw new Error("connection not established")

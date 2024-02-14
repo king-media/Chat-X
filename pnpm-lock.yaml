@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      crypto-js:
+        specifier: ^4.2.0
+        version: 4.2.0
       typescript:
         specifier: ^5.2.2
         version: 5.3.3
@@ -24,6 +27,9 @@ importers:
       '@babel/preset-typescript':
         specifier: ^7.23.3
         version: 7.23.3(@babel/core@7.23.7)
+      '@types/crypto-js':
+        specifier: ^4.2.1
+        version: 4.2.1
       '@types/jest':
         specifier: ^29.5.11
         version: 29.5.11
@@ -45,9 +51,6 @@ importers:
       eslint:
         specifier: ^8.54.0
         version: 8.56.0
-      esm:
-        specifier: ^3.2.25
-        version: 3.2.25
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.11.0)(ts-node@10.9.2)
@@ -103,12 +106,6 @@ importers:
       '@chatx/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@types/crypto-js':
-        specifier: ^4.2.1
-        version: 4.2.1
-      crypto-js:
-        specifier: ^4.2.0
-        version: 4.2.0
       typescript:
         specifier: ^5.2.2
         version: 5.3.3
@@ -3338,7 +3335,7 @@ packages:
 
   /@types/crypto-js@4.2.1:
     resolution: {integrity: sha512-FSPGd9+OcSok3RsM0UZ/9fcvMOXJ1ENE/ZbLfOPlBWj7BgXtEAM8VYfTtT760GiLbQIMoVozwVuisjvsVwqYWw==}
-    dev: false
+    dev: true
 
   /@types/dompurify@3.0.5:
     resolution: {integrity: sha512-1Wg0g3BtQF7sSb27fJQAKck1HECM6zV1EB66j8JH9i3LCjYabJa0FSdiSgsD5K/RbrsR0SiraKacLB+T8ZVYAg==}

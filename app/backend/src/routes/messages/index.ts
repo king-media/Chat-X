@@ -3,7 +3,7 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda
 import { isBlank, Message } from '@chatx/shared'
 import { corsHeaders } from '../../api/http/preflight'
 import { handleApiErrors } from '../../utils'
-import { getMessagesByChatId, addMessageToDb } from '../../services/messages'
+import { getMessagesByChatId, addMessagesToDb } from '../../services/messages'
 
 export const getChatMessages = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     const requestOrigin = String(event.headers.origin)
@@ -41,19 +41,19 @@ export const getChatMessages = async (event: APIGatewayProxyEventV2): Promise<AP
     }
 }
 
-export const addChatMessage = async (event): Promise<APIGatewayProxyResultV2> => {
+export const addChatMessages = async (event): Promise<APIGatewayProxyResultV2> => {
     const requestOrigin = String(event.headers.origin)
 
     try {
         const chatId = String(event.pathParameters?.chatId)
-        const message: Message = JSON.parse(event.body)
+        const messages: Message[] = JSON.parse(event.body)
 
         console.log('adding chat message to DB')
 
-        const messageResponse = await addMessageToDb(message)
+        const batchMessagesResponse = await addMessagesToDb(messages)
 
-        if (messageResponse.$metadata.httpStatusCode !== 200) {
-            console.log(`DB Query failed: ${messageResponse}`)
+        if (batchMessagesResponse.$metadata.httpStatusCode !== 200) {
+            console.log(`DB Query failed: ${batchMessagesResponse}`)
             return {
                 statusCode: 500,
                 headers: {
@@ -70,7 +70,7 @@ export const addChatMessage = async (event): Promise<APIGatewayProxyResultV2> =>
                 ...corsHeaders,
                 "Access-Control-Allow-Origin": requestOrigin
             },
-            body: JSON.stringify({ data: `Added message to chat: ${chatId}` })
+            body: JSON.stringify({ data: `Added messages to chat: ${chatId}` })
         }
     } catch (e) {
         console.log('Error adding chat messages', e)

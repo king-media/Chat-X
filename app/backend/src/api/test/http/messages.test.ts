@@ -1,6 +1,6 @@
 import { createResponse, mockLambdaProxyArgs } from "../../../utils/test-utils";
 import { MessagesRouteKeys, handler } from "../../http/messages";
-import { addChatMessage, getChatMessages } from "../../../routes/messages";
+import { addChatMessages, getChatMessages } from "../../../routes/messages";
 
 import { mockMessages } from "../mocks";
 import type { APIGatewayProxyResultV2 } from "aws-lambda";
@@ -9,11 +9,11 @@ import type { APIGatewayProxyResultV2 } from "aws-lambda";
 jest.mock("../../../routes/messages", () => ({
     __esModule: true,
     getChatMessages: jest.fn(),
-    addChatMessage: jest.fn()
+    addChatMessages: jest.fn()
 }))
 
 const mockGetChatMessages = getChatMessages as jest.Mock<Promise<APIGatewayProxyResultV2>>
-const mockAddChatMessages = addChatMessage as jest.Mock<Promise<APIGatewayProxyResultV2>>
+const mockAddChatMessages = addChatMessages as jest.Mock<Promise<APIGatewayProxyResultV2>>
 
 describe('Messages Route Handler', () => {
     let expectedChatMessages, expectedMessage
