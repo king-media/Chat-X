@@ -5,6 +5,7 @@ export type FormSchema = {
         required: boolean;
         min?: number;
         max?: number;
+        match?: string; // match with form field
         format: RegExp;
     }
 }
@@ -51,6 +52,10 @@ export const generateFormErrorMessage = (errors: { [key: string]: Record<string,
         errorMessages[field].push(`${capitalize(field)} format is wrong please check field requirements!`)
     }
 
+    if (!fieldErrors.match) {
+        errorMessages[field].push(`${capitalize(field)} must match ${capitalize(String(schema[field].match))}!`)
+    }
+
     return errorMessages
 }
 
@@ -62,7 +67,8 @@ export const validateForm = (schema: FormSchema, form: Record<string, string>): 
         validations[prop] = {
             required: validateRequired(schema, form, prop),
             length: validateLength(schema, form, prop),
-            format: validateFormat(schema, form, prop)
+            format: validateFormat(schema, form, prop),
+            match: validateMatch(schema, form, prop)
         }
     })
 
@@ -95,6 +101,16 @@ const validateLength = (schema: FormSchema, form: Record<string, string>, prop: 
 
     if (minLength && maxLength) {
         return propLength >= minLength && propLength <= maxLength
+    }
+
+    return true
+}
+
+const validateMatch = (schema: FormSchema, form: Record<string, string>, prop: string) => {
+    const matchField = schema[prop].match
+
+    if (isNotBlank(matchField)) {
+        return form[matchField] === form[prop]
     }
 
     return true

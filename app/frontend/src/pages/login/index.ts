@@ -33,6 +33,13 @@ const Login: Route['component'] = async (props) => {
             min: 8,
             max: 25,
             format: passwordFormat
+        },
+        confirmPassword: {
+            required: true,
+            min: 8,
+            max: 25,
+            match: 'password',
+            format: passwordFormat
         }
     }
 
@@ -51,31 +58,91 @@ const Login: Route['component'] = async (props) => {
 
     const SignUp = () => {
         return `
-        <form id="login-form">
-            <label for="username">Username:</label><br>
-            <input type="text" id="username" name="username"><br>
-            <span id="username-error" class="form-hint">Cannot have whitespace or special characters.</span><br>
-            <label for="email">Email:</label><br>
-            <input type="email" id="email" name="email"><br>
-            <span id="email-error" class="form-hint">Must be email format.</span><br>
-            <label for="password">Password:</label><br>
-            <input type="password" id="password" name="password"><br><br>
-            <span id="password-error" class="form-hint">Password must contain one uppercase letter and one special character.</span><br>
-            <input type="submit" value="Submit">
+        <form id="login-form" class="flex flex-col">
+            <button id="backBtn" class="w-20 mb-10 rounded-md bg-lime-700 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-lime-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-700">Back</button>
+            <div class="space-y-12">
+                <div class="border-b border-gray-900/10 pb-12">
+                    <h2 class="text-xl font-semibold">Sign Up</h2>
+                    <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                        <div class="sm:col-span-4 md:col-span-12">
+                            <label for="username" class="block text-lg font-medium leading-6">Username</label>
+                            <div class="mt-2">
+                                <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-lime-500 focus-within:ring-2 focus-within:ring-inset focus-within:ring-lime-600 sm:max-w-mdk bg-slate-200">
+                                    <span class="flex select-none items-center pl-3 text-gray-600 sm:text-sm">Required:</span>
+                                    <input type="text" name="username" id="username" autocomplete="username" class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="janesmith">
+                                </div>
+                                <span id="username-error"></span><br>
+                            </div>
+                        </div>
+                        <div class="sm:col-span-4 md:col-span-12">
+                            <label for="email" class="block text-lg font-medium leading-6">Email</label>
+                            <div class="mt-2">
+                                <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-lime-500 focus-within:ring-2 focus-within:ring-inset focus-within:ring-lime-600 sm:max-w-mdk bg-slate-200">
+                                    <span class="flex select-none items-center pl-3 text-gray-600 sm:text-sm">Required:</span>
+                                    <input type="email" name="email" id="email" class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="janesmith@email.com">
+                                </div>
+                                <span id="email-error"></span><br>
+                            </div>
+                        </div>
+                        <div class="sm:col-span-4 md:col-span-12">
+                            <label for="password" class="block text-lg font-medium leading-6">Password</label>
+                            <div class="mt-2">
+                                <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-lime-500 focus-within:ring-2 focus-within:ring-inset focus-within:ring-lime-600 sm:max-w-mdk bg-slate-200">
+                                    <span class="flex select-none items-center pl-3 text-gray-600 sm:text-sm">Required:</span>
+                                    <input type="password" name="password" id="password" class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="*****">
+                                </div>
+                                <span id="password-error"></span><br>
+                            </div>
+                        </div>
+                          <div class="sm:col-span-4 md:col-span-12">
+                            <label for="confirmPassword" class="block text-lg font-medium leading-6">Confirm Password</label>
+                            <div class="mt-2">
+                                <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-lime-500 focus-within:ring-2 focus-within:ring-inset focus-within:ring-lime-600 sm:max-w-mdk bg-slate-200">
+                                    <span class="flex select-none items-center pl-3 text-gray-600 sm:text-sm">Required:</span>
+                                    <input type="password" name="confirmPassword" id="confirmPassword" class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="*****">
+                                </div>
+                                <span id="confirmPassword-error"></span><br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="w-1/2 m-auto rounded-md bg-lime-700 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-lime-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-700">Submit</button>
         </form>
         `
     }
 
     const SignIn = () => {
         return `
-        <form id="login-form">
-            <label for="username">Username: Required</label><br>
-            <input type="text" id="username" name="username" placeholder="Username or Email"><br>
-            <span id="username-error" class="form-error"></span><br>
-            <label for="password">Password: Required</label><br>
-            <input type="password" id="password" name="password"><br><br>
-            <span id="password-error" class="form-error"></span><br>
-            <input type="submit" value="Submit">
+        <form id="login-form" class="flex flex-col">
+            <div class="space-y-12">
+                <div class="border-b border-gray-900/10 pb-12">
+                    <h2 class="text-xl font-semibold">Sign In</h2>
+                    <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                        <div class="sm:col-span-4 md:col-span-12">
+                            <label for="username" class="block text-lg font-medium leading-6">Username</label>
+                            <div class="mt-2">
+                                <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-lime-500 focus-within:ring-2 focus-within:ring-inset focus-within:ring-lime-600 sm:max-w-mdk bg-slate-200">
+                                    <span class="flex select-none items-center pl-3 text-gray-600 sm:text-sm">Required:</span>
+                                    <input type="text" name="username" id="username" autocomplete="username" class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="janesmith">
+                                </div>
+                                <span id="username-error"></span><br>
+                            </div>
+                        </div>
+                        <div class="sm:col-span-4 md:col-span-12">
+                            <label for="password" class="block text-lg font-medium leading-6">Password</label>
+                            <div class="mt-2">
+                                <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-lime-500 focus-within:ring-2 focus-within:ring-inset focus-within:ring-lime-600 sm:max-w-mdk bg-slate-200">
+                                    <span class="flex select-none items-center pl-3 text-gray-600 sm:text-sm">Required:</span>
+                                    <input type="password" name="password" id="password" class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="*****">
+                                </div>
+                                <span id="password-error"></span><br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="w-1/2 m-auto rounded-md bg-lime-700 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-lime-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-700">Submit</button>
         </form>
         `
     }
@@ -144,12 +211,20 @@ const Login: Route['component'] = async (props) => {
             fieldErrorElem.innerHTML = ''
 
             error[field].forEach(errorMessage => {
-                fieldErrorElem.className = 'form-error'
+                fieldErrorElem.classList.add("font-bold", "text-red-500")
                 fieldErrorElem.innerHTML = `${fieldErrorElem.innerHTML}<br>${errorMessage}`
             })
         })
 
     }
+
+    const signUpMessage = `
+    <div id="signupMessage" class="px-4 py-12 grid gap-y-4">
+        <h2 class="text-xl font-semibold">No Account?</h2>
+        <p>Sign up below to start chatting</p>
+        <button id="signup-btn" type="submit" class="w-24 rounded-md bg-lime-700 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-lime-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-700">Sign Up</button>
+    </div>
+    `
 
     const setForm = (type: FormType) => {
         const main = root.querySelector('main')
@@ -158,19 +233,27 @@ const Login: Route['component'] = async (props) => {
 
         oldForm?.remove()
         main?.insertAdjacentHTML('afterbegin', returnForm(type))
-        main?.removeChild(main.querySelector('p') as HTMLParagraphElement)
         main?.querySelector('form')?.addEventListener('submit', (e) => handleSubmit(e, isSignIn))
+
+        if (isSignIn) {
+            main?.insertAdjacentHTML('beforeend', signUpMessage)
+            main?.querySelector('#signup-btn')?.addEventListener('click', () => setForm('signup'))
+        } else {
+            main?.removeChild(main.querySelector('#signupMessage') as HTMLDivElement)
+            main?.querySelector('#backBtn')?.addEventListener('click', () => setForm('signin'))
+        }
     }
 
 
+    root.classList.add("flex", "justify-center")
     root.innerHTML = `
-        <main id="login">
+        <main id="login" class="flex flex-col w-1/3">
             ${returnForm()}
-        <p>Ready to start chatting <span id="signup-span">signup</span></p>
+            ${signUpMessage}
         </main>`
 
-    const signupSpan = root.querySelector('#signup-span')
-    signupSpan?.addEventListener('click', () => setForm('signup'))
+    const signupBtn = root.querySelector('#signup-btn')
+    signupBtn?.addEventListener('click', () => setForm('signup'))
 
 
     root.querySelector('form')?.addEventListener('submit', (e) => handleSubmit(e, true))

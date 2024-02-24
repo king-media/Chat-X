@@ -1,4 +1,4 @@
-import { isNotBlank } from "./guards"
+import { isNotBlank } from "../guards"
 
 export const dbUserNameRegex = /(?<username>^.*)::(?<email>[^\s@]+@[^\s@]+\.[^\s@]+$)/
 

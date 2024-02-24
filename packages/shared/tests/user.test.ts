@@ -1,4 +1,4 @@
-import { parseDbUserName } from '../user'
+import { parseDbUserName } from '../utilities/user'
 
 describe('parseDbUserName tests', () => {
     const dbUserName = "user.name::fakeemail@email.com"

@@ -1,14 +1,12 @@
 {
   "name": "@chatx/backend",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "sideEffects": false,
   "scripts": {
     "test": "jest",
     "dev": "nodemon ./scripts/dev.ts",
-    "build": "ts-node ./scripts/build.ts",
-    "deploy:staging": "pnpm build && sam deploy --stack-name chatx-staging --s3-prefix chatx-staging --parameter-overrides='Environment=staging'",
-    "deploy:prod": "pnpm build && sam deploy --stack-name chatx-prod --s3-prefix chatx-prod --parameter-overrides='Environment=prod'",
-    "dev:start": "docker compose up"
+    "dev:start": "docker compose up",
+    "build": "ts-node ./scripts/build.ts"
   },
   "dependencies": {
     "@aws-sdk/client-apigatewaymanagementapi": "^3.484.0",
@@ -21,10 +19,8 @@
     "@aws-sdk/lib-dynamodb": "^3.490.0",
     "@types/aws-lambda": "^8.10.130",
     "@types/uuid": "^9.0.7",
-    "esbuild": "^0.19.10",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
-    "esm": "^3.2.25",
-    "ts-node": "^10.9.1"
+    "esm": "^3.2.25"
   }
 }

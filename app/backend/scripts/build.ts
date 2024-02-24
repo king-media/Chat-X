@@ -42,8 +42,6 @@ async function build() {
 
         await zipFiles(fileExecs)
     })
-
-    await exec("sam build")
 }
 
 build()

@@ -1,16 +1,17 @@
 import { getCurrentUser } from "~src/api/auth";
+import { CurrentUser } from "~src/api/types";
 
-const AccountInfo = (e?: Event, settingsContainer?: HTMLDivElement) => {
-    const currentUser = getCurrentUser()
+const AccountInfo = (settingsContainer?: HTMLDivElement) => {
+    const currentUser = <CurrentUser>getCurrentUser()
     const accountInfoId = 'account-info-container';
     const root = document.createElement('div')
 
     root.setAttribute('id', accountInfoId)
     root.innerHTML = `
         <h1>Account Information</h1>
-        <p>Signed up on ${currentUser?.user.creationDate}</p>
-        <p>Username: ${currentUser?.user.username} </p>
-        <p>Email: ${currentUser?.user.email} </p>
+        <p>Signed up on ${currentUser?.user?.createdAt}</p>
+        <p>Username: ${currentUser?.user?.username} </p>
+        <p>Email: ${currentUser?.user?.email} </p>
     `
 
     if (settingsContainer && !settingsContainer.querySelector(`#${accountInfoId}`)) {

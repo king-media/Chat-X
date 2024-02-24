@@ -5,10 +5,13 @@ import path from 'path'
 import { defineConfig } from 'vite'
 
 import postcssMixins from 'postcss-mixins'
-import postcssNested from 'postcss-nested'
+import autoprefixer from 'autoprefixer'
+import tailwind from 'tailwindcss'
+import tailwindNesting from 'tailwindcss/nesting'
 
 const mixins = {
-  state: (mixin, property: string, active: string, color = "lightgray") => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  state: (_mixin: any, property: string, active: string, color = "lightgray") => ({
     [property]: {
       '&:hover': {
         cursor: 'pointer',
@@ -26,7 +29,7 @@ const mixins = {
 export default defineConfig({
   css: {
     postcss: {
-      plugins: [postcssMixins({ mixins }), postcssNested],
+      plugins: [postcssMixins({ mixins }), tailwindNesting, tailwind, autoprefixer],
     },
   },
   resolve: {

@@ -11,6 +11,6 @@
     "noImplicitAny": false,
     "types": ["jest", "node"]
   },
-  "include": ["/**/*.ts"],
+  "include": ["/**/*.ts", "../frontend/scripts/build.js"],
   "exclude": ["node_modules"]
 }

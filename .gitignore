@@ -30,3 +30,4 @@ dist-ssr
 samconfig*.*
 template.yaml
 */backend/sam-templates
+*/frontend/sam-templates

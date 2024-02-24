@@ -1,20 +1,22 @@
 {
   "name": "@chatx/frontend",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "dev:staging": "vite -m staging",
     "dev:prod": "vite -m production",
-    "build": "tsc && vite build",
-    "build:staging": "tsc && vite build -m staging",
-    "build:dev": "NODE_ENV=development tsc && vite build -m development",
+    "prebuild": "tsc && pnpm build:lambda",
+    "build:lambda": "esbuild ./s3-lambda/app-upload.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outdir=./s3-lambda/dist && cd ./s3-lambda/dist && zip -r app-upload.zip . -i 'app-upload.*'",
+    "build": "NODE_ENV=production pnpm prebuild && vite build",
+    "build:staging": "NODE_ENV=staging pnpm prebuild && vite build -m staging",
+    "build:dev": "NODE_ENV=development pnpm prebuild && vite build -m development",
     "preview": "vite preview",
     "lint": "tsc && eslint ."
   },
   "dependencies": {
-    "@aws-sdk/client-api-gateway": "3.478.0",
+    "@aws-sdk/client-s3": "^3.514.0",
     "@chatx/shared": "workspace:*",
     "typescript": "^5.2.2",
     "vite": "^5.0.0"
@@ -28,6 +30,7 @@
     "postcss-mixins": "^9.0.4",
     "postcss-nested": "^6.0.1",
     "postcss-plugin": "^1.0.0",
+    "tailwindcss": "^3.4.1",
     "vitest": "^1.1.3"
   }
 }

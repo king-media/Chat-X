@@ -12,8 +12,9 @@ export {
     isWhitespaceString,
     isZeroLengthString
 } from './guards'
-export { parseDbUserName, stringifyDbUserName } from './user'
-export { camelCase, capitalize, replaceAt } from './string'
+export { parseDbUserName, stringifyDbUserName } from './utilities/user'
+export { camelCase, capitalize, replaceAt } from './utilities/string'
+export * as cfnResponse from './utilities/cfn-response'
 export {
     type Chat,
     type ChatList,

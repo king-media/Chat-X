@@ -26,10 +26,11 @@ const Settings: Route['component'] = async () => {
     const notificationSettingSpan = root.querySelector('#notification-settings')
     const logoutSpan = root.querySelector('#logout')
 
-    accountInfoSpan?.addEventListener('click', (e) => AccountInfo(e, <HTMLDivElement>root.querySelector('#settings-container')))
-    notificationSettingSpan?.addEventListener('click', (e) => NotificationSettings(e, <HTMLDivElement>root.querySelector('#settings-container')))
+    accountInfoSpan?.addEventListener('click', () => AccountInfo(<HTMLDivElement>root.querySelector('#settings-container')))
+    notificationSettingSpan?.addEventListener('click', () => NotificationSettings(<HTMLDivElement>root.querySelector('#settings-container')))
     logoutSpan?.addEventListener('click', async () => {
         try {
+            // NOTE: Update Backend to support logging out (terminate user token). Remove user from localstorage.
             await fetchApi('/auth/logout', { method: 'POST' })
         } catch (e) {
             const error = <Error>e

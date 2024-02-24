@@ -1,5 +1,5 @@
 
-const NotificationSettings = (e?: Event, settingsContainer?: HTMLDivElement) => {
+const NotificationSettings = (settingsContainer?: HTMLDivElement) => {
     const notificationSettingsId = 'notification-settings-container';
     const root = document.createElement('div')
 
